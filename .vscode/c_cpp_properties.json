@@ -53,7 +53,20 @@
                 "c:\\users\\stella\\appdata\\local\\arduino15\\packages\\seeeduino\\tools\\arm-none-eabi-gcc\\7-2017q4\\arm-none-eabi\\include\\c++\\7.2.1\\backward",
                 "c:\\users\\stella\\appdata\\local\\arduino15\\packages\\seeeduino\\tools\\arm-none-eabi-gcc\\7-2017q4\\lib\\gcc\\arm-none-eabi\\7.2.1\\include",
                 "c:\\users\\stella\\appdata\\local\\arduino15\\packages\\seeeduino\\tools\\arm-none-eabi-gcc\\7-2017q4\\lib\\gcc\\arm-none-eabi\\7.2.1\\include-fixed",
-                "c:\\users\\stella\\appdata\\local\\arduino15\\packages\\seeeduino\\tools\\arm-none-eabi-gcc\\7-2017q4\\arm-none-eabi\\include"
+                "c:\\users\\stella\\appdata\\local\\arduino15\\packages\\seeeduino\\tools\\arm-none-eabi-gcc\\7-2017q4\\arm-none-eabi\\include",
+                "C:\\Users\\Stella\\AppData\\Local\\Arduino15\\packages\\Seeeduino\\hardware\\samd\\1.8.3\\libraries\\Adafruit_ZeroDMA",
+                "C:\\Users\\Stella\\AppData\\Local\\Arduino15\\packages\\Seeeduino\\hardware\\samd\\1.8.3\\libraries\\EnergySaving",
+                "C:\\Users\\Stella\\AppData\\Local\\Arduino15\\packages\\Seeeduino\\hardware\\samd\\1.8.3\\libraries\\FlashStorage",
+                "C:\\Users\\Stella\\AppData\\Local\\Arduino15\\packages\\Seeeduino\\hardware\\samd\\1.8.3\\libraries\\HID",
+                "C:\\Users\\Stella\\AppData\\Local\\Arduino15\\packages\\Seeeduino\\hardware\\samd\\1.8.3\\libraries\\I2S",
+                "C:\\Users\\Stella\\AppData\\Local\\Arduino15\\packages\\Seeeduino\\hardware\\samd\\1.8.3\\libraries\\LoRaWan",
+                "C:\\Users\\Stella\\AppData\\Local\\Arduino15\\packages\\Seeeduino\\hardware\\samd\\1.8.3\\libraries\\Seeed_Arduino_FreeRTOS",
+                "C:\\Users\\Stella\\AppData\\Local\\Arduino15\\packages\\Seeeduino\\hardware\\samd\\1.8.3\\libraries\\Seeed_Arduino_LCD",
+                "C:\\Users\\Stella\\AppData\\Local\\Arduino15\\packages\\Seeeduino\\hardware\\samd\\1.8.3\\libraries\\SoftwareSerial",
+                "C:\\Users\\Stella\\AppData\\Local\\Arduino15\\packages\\Seeeduino\\hardware\\samd\\1.8.3\\libraries\\SPI",
+                "C:\\Users\\Stella\\AppData\\Local\\Arduino15\\packages\\Seeeduino\\hardware\\samd\\1.8.3\\libraries\\TimerTC3",
+                "C:\\Users\\Stella\\AppData\\Local\\Arduino15\\packages\\Seeeduino\\hardware\\samd\\1.8.3\\libraries\\TimerTCC0",
+                "C:\\Users\\Stella\\AppData\\Local\\Arduino15\\packages\\Seeeduino\\hardware\\samd\\1.8.3\\libraries\\USBHost",
             ],
             "forcedInclude": [
                 "C:\\Users\\Stella\\AppData\\Local\\Arduino15\\packages\\Seeeduino\\hardware\\samd\\1.8.3\\cores\\arduino\\Arduino.h"

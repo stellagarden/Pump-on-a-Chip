@@ -3,11 +3,12 @@
 // Author       : Hyemin Stella Lee
 // Created      : 04/05/2023
 // Description  : Read pressure from gauge and print it as mbar unit
+//                via serical monitor in PC
 // -----------------------------------------------------------
 
 #include <Wire.h>
 
-int address_sensor= 56; // 0x38
+#define GAUGE_ADDR 56 // 0x38
 uint16_t rawdata = 0;
 float pressure = 0;
 
@@ -15,24 +16,25 @@ void setup(){
   Serial.begin(9600);
   Serial1.begin(9600);
   Wire.begin();
-
-  Wire.beginTransmission(address_sensor); //Send a request to begin communication with the device at the specified address
+  Wire.beginTransmission(GAUGE_ADDR); //Send a request to begin communication with the device at the specified address
   Wire.endTransmission();
 }
 
 void loop(){
-  
-  Wire.requestFrom(address_sensor, 2);    // requests 2 bytes from the specified address
-
+  Wire.requestFrom(GAUGE_ADDR, 2);  // requests 2 bytes from the specified address
   if (Wire.available() > 0){
     rawdata = Wire.read();
     rawdata = rawdata << 8;
     rawdata |= Wire.read();
-    
-    pressure = 0.316456*rawdata-1580.74;    // Convert rawdata to actual pressure
-    Serial.println(pressure);
-    Serial1.println(pressure);
+    pressure = 0.316456*rawdata-1580.74;  // Convert raw data to actual pressure
+    Serial.print(pressure);
+    Serial.print(" mbar | P_at + ");
+    Serial.print(pressure-1013.25);
+    Serial.println(" mbar");
+    Serial1.print(pressure);
+    Serial1.print(" mbar | P_at + ");
+    Serial1.print(pressure-1013.25);
+    Serial1.println(" mbar");
   }  
-
   delay(100);
 }

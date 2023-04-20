@@ -1,11 +1,12 @@
+// -----------------------------------------------------------
+// FileName     : gauge_example-read_rawdata.ino
+// Author       : Hyemin Stella Lee
+// Created      : 4/6/2023
+// Description  : Turn on and off solenoid pinch valve with push button
+// -----------------------------------------------------------
+
 #include <Wire.h>
 
-// Gauge
-#define GAUGE_ADDR 56 // 0x38
-uint16_t rawdata = 0;
-float pressure = 0;
-
-// Solenoid Pinch
 #define SOLPINCH_PIN 3
 #define BUTTON_PIN 2
 byte solPinchState = LOW;
@@ -15,14 +16,6 @@ void solPinch() {
 }
 
 void setup() {
-  // Gauge
-  Serial.begin(9600);
-  Serial1.begin(9600);
-  Wire.begin();
-  Wire.beginTransmission(GAUGE_ADDR); //Send a request to begin communication with the device at the specified address
-  Wire.endTransmission();
-
-  // Solenoid Pinch
   pinMode(SOLPINCH_PIN, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(BUTTON_PIN, INPUT);
@@ -30,24 +23,6 @@ void setup() {
 }
 
 void loop() {
-  // Gauge
-  Wire.requestFrom(GAUGE_ADDR, 2);  // requests 1 byte from the specified address
-  if (Wire.available() > 0){
-    rawdata = Wire.read();
-    rawdata = rawdata << 8;
-    rawdata |= Wire.read();
-    pressure = 0.316456*rawdata-1580.74;
-    Serial.print(pressure);
-    Serial.print(" mbar | P_at + ");
-    Serial.print(pressure-1013.25);
-    Serial.println(" mbar");
-    Serial1.print(pressure);
-    Serial1.print(" mbar | P_at + ");
-    Serial1.print(pressure-1013.25);
-    Serial1.println(" mbar");
-  }  
-
-  // Solenoid Pinch
   if (solPinchState) {
     analogWrite(SOLPINCH_PIN, 240);
     digitalWrite(LED_BUILTIN, HIGH);

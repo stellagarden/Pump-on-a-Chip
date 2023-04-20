@@ -1,4 +1,10 @@
-// I2C address scanner program
+// -----------------------------------------------------------
+// FileName     : gauge_example-read_rawdata.ino
+// Author       : Hyemin Stella Lee
+// Created      : 3/27/2023
+// Description  : Read address of I2C device
+// -----------------------------------------------------------
+
 #include <Wire.h>
 
 void setup()

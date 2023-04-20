@@ -1,3 +1,10 @@
+// -----------------------------------------------------------
+// FileName     : gauge_example-read_rawdata.ino
+// Author       : Hyemin Stella Lee
+// Created      : 4/10/2023
+// Description  : Toggle built-in LED with push button
+// -----------------------------------------------------------
+
 #define BUTTON_PIN 2
 byte buttonState = LOW;
 

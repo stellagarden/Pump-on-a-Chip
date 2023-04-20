@@ -38,7 +38,7 @@ void setup() {
 
 void loop() {
   // Gauge
-  Wire.requestFrom(GAUGE_ADDR, 2);  // requests 1 byte from the specified address
+  Wire.requestFrom(GAUGE_ADDR, 2);  // requests 2 bytes from the specified address
   if (Wire.available() > 0){
     rawdata = Wire.read();
     rawdata = rawdata << 8;

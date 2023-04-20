@@ -1,3 +1,10 @@
+// -----------------------------------------------------------
+// FileName     : gauge_example-read_rawdata.ino
+// Author       : Hyemin Stella Lee
+// Created      : 4/5/2023
+// Description  : Read pressure from gauge and print it as mbar unit
+// -----------------------------------------------------------
+
 #include <Wire.h>
 
 int address_sensor= 56; // 0x38
@@ -15,14 +22,14 @@ void setup(){
 
 void loop(){
   
-  Wire.requestFrom(address_sensor, 2);// requests 1 byte from the specified address
+  Wire.requestFrom(address_sensor, 2);    // requests 2 bytes from the specified address
 
   if (Wire.available() > 0){
     rawdata = Wire.read();
     rawdata = rawdata << 8;
     rawdata |= Wire.read();
-    // Convert rawdata to actual pressure
-    pressure = 0.316456*rawdata-1580.74;
+    
+    pressure = 0.316456*rawdata-1580.74;    // Convert rawdata to actual pressure
     Serial.println(pressure);
     Serial1.println(pressure);
   }  

@@ -1,3 +1,10 @@
+// -----------------------------------------------------------
+// FileName     : main.ino
+// Author       : Hyemin Stella Lee
+// Created      : 04/19/2023
+// Description  : Runs overall pump-on-ac-chip system
+// -----------------------------------------------------------
+
 #include <Wire.h>
 
 // Gauge

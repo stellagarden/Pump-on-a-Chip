@@ -1,7 +1,7 @@
 // -----------------------------------------------------------
-// FileName     : gauge_example-read_rawdata.ino
+// FileName     : I2C_read_address.ino
 // Author       : Hyemin Stella Lee
-// Created      : 3/27/2023
+// Created      : 03/27/2023
 // Description  : Read address of I2C device
 // -----------------------------------------------------------
 

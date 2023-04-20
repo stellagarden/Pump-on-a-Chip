@@ -1,7 +1,7 @@
 // -----------------------------------------------------------
-// FileName     : gauge_example-read_rawdata.ino
+// FileName     : gauge_example.ino
 // Author       : Hyemin Stella Lee
-// Created      : 4/5/2023
+// Created      : 04/05/2023
 // Description  : Read pressure from gauge and print it as mbar unit
 // -----------------------------------------------------------
 

@@ -1,5 +1,5 @@
 // -----------------------------------------------------------
-// FileName     : gauge_example-read_rawdata.ino
+// FileName     : solenoid_pinch_valve_example.ino
 // Author       : Hyemin Stella Lee
 // Created      : 4/6/2023
 // Description  : Turn on and off solenoid pinch valve with push button

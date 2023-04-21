@@ -67,6 +67,7 @@
                 "C:\\Users\\Stella\\AppData\\Local\\Arduino15\\packages\\Seeeduino\\hardware\\samd\\1.8.3\\libraries\\TimerTC3",
                 "C:\\Users\\Stella\\AppData\\Local\\Arduino15\\packages\\Seeeduino\\hardware\\samd\\1.8.3\\libraries\\TimerTCC0",
                 "C:\\Users\\Stella\\AppData\\Local\\Arduino15\\packages\\Seeeduino\\hardware\\samd\\1.8.3\\libraries\\USBHost",
+                "C:\\Users\\Stella\\AppData\\Local\\Arduino15\\packages\\Seeeduino\\hardware\\samd\\1.8.3\\libraries\\Goldelox-Serial-Arduino-Library-master"
             ],
             "forcedInclude": [
                 "C:\\Users\\Stella\\AppData\\Local\\Arduino15\\packages\\Seeeduino\\hardware\\samd\\1.8.3\\cores\\arduino\\Arduino.h"

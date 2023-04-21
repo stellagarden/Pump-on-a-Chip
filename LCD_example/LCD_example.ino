@@ -5,12 +5,17 @@
 // Description  : Print "Hello World" on LCD screen
 // -----------------------------------------------------------
 
-#include <SPI.h> // Include the SPI library
-// #include <Serial_LCD.h> // Include the uLCD library
+#include <SPI.h>
 
-Serial_LCD SLCD; // Create a new instance of the Serial_LCD class
+#include "Goldelox_Serial_4DLib.h"
+#include "Goldelox_Const4D.h"
+
+#define DisplaySerial Serial
+
+Goldelox_Serial_4DLib Display(&DisplaySerial);
 
 void setup() {
+  DisplaySerial.begin(9600);
   Serial.begin(9600); // Start the serial communication at 9600 baud
   SLCD.begin(); // Initialize the uLCD module
   SLCD.clear(); // Clear the screen

@@ -1,3 +1,10 @@
+// -----------------------------------------------------------
+// FileName     : uLCD_example.ino
+// Author       : Andy Tang
+// Created      : 04/22/2023
+// Description  : Print example gauge value on uLCD-144-G2
+// -----------------------------------------------------------
+
 #include "Goldelox_Serial_4DLib.h"
 #include "Goldelox_Const4D.h"
 
@@ -9,10 +16,8 @@ Goldelox_Serial_4DLib Display(&DisplaySerial);
 void LCD_print(float a, float b) {
   Display.txt_MoveCursor(2,0) ;
   Display.print(a);
-  // Display.putstr(" mbar   ");
   Display.txt_MoveCursor(6,0) ;
   Display.print(b);
-  // Display.putstr(" mbar   ");
 }
 
 void setup() {
@@ -28,8 +33,8 @@ void setup() {
   Display.gfx_Cls() ;
   Display.txt_Height(2) ;
   Display.txt_Width(2) ;
-  Display.putstr("L:") ;
-  Display.putstr("\n\n\n\nR:");
+  Display.putstr("Pump (mbar)") ;
+  Display.putstr("\n\n\n\nChip (mbar)");
 }
 
 void loop() {

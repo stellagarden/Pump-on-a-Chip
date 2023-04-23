@@ -33,8 +33,8 @@ void setup() {
   Display.gfx_Cls() ;
   Display.txt_Height(2) ;
   Display.txt_Width(2) ;
-  Display.putstr("Pump (mbar)") ;
-  Display.putstr("\n\n\n\nChip (mbar)");
+  Display.putstr("Pump") ;
+  Display.putstr("\n\n\n\nChip");
 }
 
 void loop() {

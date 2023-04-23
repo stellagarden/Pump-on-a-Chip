@@ -24,11 +24,11 @@ void setup() {
 
 void loop() {
   if (solPinchState) {
-    analogWrite(SOLPINCH_PIN, 240);
-    digitalWrite(LED_BUILTIN, HIGH);
-  } else {
-    analogWrite(SOLPINCH_PIN, 0);
+    analogWrite(SOLPINCH_PIN, 240);   // close
     digitalWrite(LED_BUILTIN, LOW);
+  } else {
+    analogWrite(SOLPINCH_PIN, 0);     // open
+    digitalWrite(LED_BUILTIN, HIGH);
   }
 
   delay(100);

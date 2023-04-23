@@ -3,7 +3,7 @@
 // Author       : Hyemin Stella Lee
 // Created      : 04/05/2023
 // Description  : Read pressure from gauge and print it as mbar unit
-//                via serical monitor in PC
+//                via serial monitor in PC
 // -----------------------------------------------------------
 
 #include <Wire.h>

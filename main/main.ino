@@ -62,8 +62,8 @@ void setup() {
   Display.gfx_Cls() ;
   Display.txt_Height(2) ;
   Display.txt_Width(2) ;
-  Display.putstr("Pump (mbar)") ;
-  Display.putstr("\n\n\n\nChip (mbar)");
+  Display.putstr("Pump") ;
+  Display.putstr("\n\n\n\nChip");
 }
 
 void loop() {
@@ -79,11 +79,11 @@ void loop() {
 
   // Solenoid Pinch
   if (solPinchState) {
-    analogWrite(SOLPINCH_PIN, 240);
-    digitalWrite(LED_BUILTIN, HIGH);
-  } else {
-    analogWrite(SOLPINCH_PIN, 0);
+    analogWrite(SOLPINCH_PIN, 240); // close
     digitalWrite(LED_BUILTIN, LOW);
+  } else {
+    analogWrite(SOLPINCH_PIN, 0);   // open
+    digitalWrite(LED_BUILTIN, HIGH);
   }
 
   delay(100);

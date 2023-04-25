@@ -1,8 +1,8 @@
 // -----------------------------------------------------------
-// FileName     : main.ino
+// FileName     : main_gauge_valve_uLCD.ino
 // Author       : Hyemin Stella Lee
 // Created      : 04/19/2023
-// Description  : Runs overall pump-on-a-chip system
+// Description  : Prints gauge's value on uLCD, and controls one valve
 // -----------------------------------------------------------
 
 #include <Wire.h>

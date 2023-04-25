@@ -25,8 +25,8 @@ void loop(){
   if (Wire.available() > 0){
     rawdata = Wire.read();
     rawdata = rawdata << 8;
+    pressure = 0.316456*rawdata-1590.23;  // Convert raw data to actual pressure
     rawdata |= Wire.read();
-    pressure = 0.316456*rawdata-1580.74;  // Convert raw data to actual pressure
     Serial.print(pressure);
     Serial.print(" mbar | P_at + ");
     Serial.print(pressure-1013.25);

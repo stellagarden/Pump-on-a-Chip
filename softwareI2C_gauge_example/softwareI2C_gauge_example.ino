@@ -26,7 +26,7 @@ void loop(){
     rawdata = softwarei2c.read();
     rawdata = rawdata << 8;
     rawdata |= softwarei2c.read();
-    pressure = 0.316456*rawdata-1580.74;  // Convert raw data to actual pressure
+    pressure = 0.316456*rawdata-1590.23;  // Convert raw data to actual pressure
     Serial.print(pressure);
     Serial.print(" mbar | P_at + ");
     Serial.print(pressure-1013.25);

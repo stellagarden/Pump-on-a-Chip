@@ -69,7 +69,7 @@ void loop() {
     rawdata1 = Wire.read();
     rawdata1 = rawdata1 << 8;
     rawdata1 |= Wire.read();
-    pressure1 = 0.316456*rawdata1-1580.74;  // Convert raw data to actual pressure
+    pressure1 = 0.316456*rawdata1-1590.23;  // Convert raw data to actual pressure
     LCD_print1(pressure1);
   }  
 
@@ -79,7 +79,7 @@ void loop() {
     rawdata2 = softwarei2c.read();
     rawdata2 = rawdata2 << 8;
     rawdata2 |= softwarei2c.read();
-    pressure2 = 0.316456*rawdata2-1580.74;  // Convert raw data to actual pressure
+    pressure2 = 0.316456*rawdata2-1590.23;  // Convert raw data to actual pressure
     LCD_print2(pressure2);
   }    
 

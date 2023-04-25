@@ -73,7 +73,7 @@ void loop() {
     rawdata = Wire.read();
     rawdata = rawdata << 8;
     rawdata |= Wire.read();
-    pressure = 0.316456*rawdata-1580.74;  // Convert raw data to actual pressure
+    pressure = 0.316456*rawdata-1590.23;  // Convert raw data to actual pressure
     LCD_print(pressure, 2000.0-pressure);
   }  
 

@@ -1,5 +1,5 @@
 // -----------------------------------------------------------
-// FileName     : gauge_example.ino
+// FileName     : I2C_gauge_example.ino
 // Author       : Hyemin Stella Lee
 // Created      : 04/05/2023
 // Description  : Read pressure from gauge and print it as mbar unit

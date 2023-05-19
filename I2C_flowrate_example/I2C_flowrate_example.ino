@@ -26,16 +26,12 @@ void loop(){
   if (Wire.available() > 0){
     rawdata = Wire.read();
     rawdata = rawdata << 8;
-    pressure = 0.316456*rawdata-1590.23;  // Convert raw data to actual pressure
     rawdata |= Wire.read();
-    Serial.print(pressure);
-    Serial.print(" mbar | P_at + ");
-    Serial.print(pressure-1013.25);
-    Serial.println(" mbar");
-    Serial1.print(pressure);
-    Serial1.print(" mbar | P_at + ");
-    Serial1.print(pressure-1013.25);
-    Serial1.println(" mbar");
+    flowrate = rawdata / 500;  // Convert raw data to actual flowrate
+    Serial.print(flowrate);
+    Serial.println(" ml/min");
+    Serial1.print(flowrate);
+    Serial1.println(" ml/min");
   }  
-  delay(100);
+  delay(10);
 }

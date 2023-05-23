@@ -8,21 +8,20 @@
 
 #include <Wire.h>
 
-#define FLOWRATE_ADDR 8 // 0x38
+#define FLOWRATE_ADDR 8  // 0x08
 uint16_t rawdata = 0;
 float flowrate = 0;
 
-void setup(){
+void setup() {
   Serial.begin(9600);
-  Serial1.begin(9600);
   Wire.begin();
   Wire.beginTransmission(FLOWRATE_ADDR);
-  Wire.write(0x3608); // Start continuous reading
+  Wire.write(0x3608);  // Start continuous reading
   Wire.endTransmission();
 }
 
-void loop(){
-  Wire.requestFrom(FLOWRATE_ADDR, 2);  // requests 2 bytes from the specified address
+void loop() {
+  Wire.requestFrom(FLOWRATE_ADDR, 2);  // requests 2 bytes from the the sensor
   if (Wire.available() > 0){
     rawdata = Wire.read();
     rawdata = rawdata << 8;
@@ -30,8 +29,6 @@ void loop(){
     flowrate = rawdata / 500;  // Convert raw data to actual flowrate
     Serial.print(flowrate);
     Serial.println(" ml/min");
-    Serial1.print(flowrate);
-    Serial1.println(" ml/min");
-  }  
+  }
   delay(10);
 }

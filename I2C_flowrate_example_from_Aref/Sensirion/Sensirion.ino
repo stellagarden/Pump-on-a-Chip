@@ -35,7 +35,7 @@
 #include "sensirion-lf.h"
 
 // comment / uncomment this to generate output for humans or the Arduino IDE plotter
- #define GENERATE_PLOTTER_OUTPUT
+// #define GENERATE_PLOTTER_OUTPUT
 
 // delay between measurements
 #define MEASURE_DELAY 100

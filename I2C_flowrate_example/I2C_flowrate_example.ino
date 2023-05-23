@@ -6,29 +6,42 @@
 //                via serial monitor in PC
 // -----------------------------------------------------------
 
-#include <Wire.h>
+#include "sensirion-lf.h"
+#include <movingAvg.h>
 
-#define FLOWRATE_ADDR 8  // 0x08
-uint16_t rawdata = 0;
-float flowrate = 0;
+// comment / uncomment this to apply moving average on sensor value
+#define APPLY_MOVING_AVG
+
+#define MEASURE_DELAY       100
+#define MOVING_AVG_WIN_LEN  10
+
+float flowrate;
+movingAvg avgFlow(MOVING_AVG_WIN_LEN);
 
 void setup() {
   Serial.begin(9600);
-  Wire.begin();
-  Wire.beginTransmission(FLOWRATE_ADDR);
-  Wire.write(0x3608);  // Start continuous reading
-  Wire.endTransmission();
+  SLF3X.init();
+  avgFlow.begin();
 }
 
 void loop() {
-  Wire.requestFrom(FLOWRATE_ADDR, 2);  // requests 2 bytes from the the sensor
-  if (Wire.available() > 0){
-    rawdata = Wire.read();
-    rawdata = rawdata << 8;
-    rawdata |= Wire.read();
-    flowrate = rawdata / 500;  // Convert raw data to actual flowrate
-    Serial.print(flowrate);
+  int ret = SLF3X.readSample();
+  if (ret == 0) {
+#ifdef APPLY_MOVING_AVG
+    int flow_val_int = (int)(SLF3X.getFlow()*500);
+    int average_flow = avgFlow.reading(flow_val_int);
+    flowrate = average_flow / 500.0;
+#else
+    flowrate = SLF3X.getFlow();
+#endif
+    Serial.print("Flow: ");
+    Serial.print(flowrate, 2);
     Serial.println(" ml/min");
+  } else {
+    Serial.print("Error in SLF3X.readSample(): ");
+    Serial.println(ret);
+    SLF3X.init();
   }
-  delay(10);
+
+  delay(MEASURE_DELAY); // delay between reads
 }

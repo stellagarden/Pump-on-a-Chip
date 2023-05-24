@@ -1,14 +1,17 @@
 // -----------------------------------------------------------
-// FileName     : main_gauges_uLCD.ino
+// FileName     : main_gauges_uLCD_propValve_flow.ino
 // Author       : Hyemin Stella Lee
 // Created      : 04/24/2023
-// Description  : Prints gauges' value on uLCD
+// Description  : Prints gauges' value and flow rate on uLCD
+//                while controlling proportional valve
 // -----------------------------------------------------------
 
 #include <Wire.h>
 #include <SoftwareI2C.h>
 #include "Goldelox_Serial_4DLib.h"
 #include "Goldelox_Const4D.h"
+#include "sensirion-lf.h"
+#include <movingAvg.h>
 
 // Gauge1
 #define GAUGE_ADDR 56 // 0x38
@@ -30,14 +33,30 @@ Goldelox_Serial_4DLib Display(&DisplaySerial);
 // Proportional Valve
 #define PROPOR_PIN A0
 
+// Flow rate
+// #define APPLY_MOVING_AVG    // comment / uncomment this to apply moving average on sensor value
+#define MEASURE_DELAY       100
+#define MOVING_AVG_WIN_LEN  10
+float flowrate;
+movingAvg avgFlow(MOVING_AVG_WIN_LEN);
+
+
 void LCD_print1(float p1) {
-  Display.txt_MoveCursor(2,0) ;
-  Display.print(p1);
+  Display.txt_MoveCursor(1,0) ;
+  Display.print(p1,2);
+  Display.print("   ");
 }
 
 void LCD_print2(float p2) {
-  Display.txt_MoveCursor(6,0) ;
-  Display.print(p2);
+  Display.txt_MoveCursor(3,0) ;
+  Display.print(p2,2);
+  Display.print("   ");
+}
+
+void LCD_print3(float p3) {
+  Display.txt_MoveCursor(5,0) ;
+  Display.print(p3,2);
+  Display.print("   ");
 }
 
 
@@ -65,13 +84,18 @@ void setup() {
   Display.txt_Height(2) ;
   Display.txt_Width(2) ;
   Display.putstr("Pump") ;
-  Display.putstr("\n\n\n\nChip");
+  Display.putstr("\n\nChip");
+  Display.putstr("\n\nFlowrate");
 
   // Potentiometer
   pinMode(POT_PIN,INPUT);
 
   // Proportional Valve
   analogWriteResolution(10);
+
+  // Flow rate
+  SLF3X.init();
+  avgFlow.begin();
 }
 
 void loop() {
@@ -100,5 +124,18 @@ void loop() {
   Display.txt_MoveCursor(8,0) ;
   Display.print(analogRead(POT_PIN));
 
-  delay(100);
+  // Flow rate
+  if (SLF3X.readSample() == 0) {
+#ifdef APPLY_MOVING_AVG
+    int flow_val_int = (int)(SLF3X.getFlow()*500);
+    int average_flow = avgFlow.reading(flow_val_int);
+    flowrate = average_flow / 500.0;
+#else
+    flowrate = SLF3X.getFlow();
+#endif
+    LCD_print3(flowrate);
+    // LCD_print3(rawdata1);
+  }
+
+  delay(MEASURE_DELAY);
 }

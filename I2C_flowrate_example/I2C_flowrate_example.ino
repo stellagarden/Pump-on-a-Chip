@@ -25,8 +25,7 @@ void setup() {
 }
 
 void loop() {
-  int ret = SLF3X.readSample();
-  if (ret == 0) {
+  if (SLF3X.readSample() == 0) {
 #ifdef APPLY_MOVING_AVG
     int flow_val_int = (int)(SLF3X.getFlow()*500);
     int average_flow = avgFlow.reading(flow_val_int);

@@ -25,32 +25,63 @@ def start():
         serialSend("S"+str(inputType.get())+input_pressure.get())
 
 def p_load_cells(event):
-    serialSend("C")
+    if GUI_mode.get() == "User Mode":
+        serialSend("C")
 
 def r_load_cells(event):
-    serialSend("CR")
+    if GUI_mode.get() == "User Mode":
+        serialSend("CR")
 
 def p_run_pump(event):
-    serialSend("P")
+    if GUI_mode.get() == "User Mode":
+        serialSend("P")
 
 def r_run_pump(event):
-    serialSend("PR")
+    if GUI_mode.get() == "User Mode":
+        serialSend("PR")
 
 def p_vent_p_res(event):
-    serialSend("A")
+    if GUI_mode.get() == "User Mode":
+        serialSend("A")
 
 def r_vent_p_res(event):
-    serialSend("AR")
+    if GUI_mode.get() == "User Mode":
+        serialSend("AR")
 
 def p_vent_c_res(event):
-    serialSend("B")
+    if GUI_mode.get() == "User Mode":
+        serialSend("B")
 
 def r_vent_c_res(event):
-    serialSend("BR")
+    if GUI_mode.get() == "User Mode":
+        serialSend("BR")
 
 def set_prop_valve():
     serialSend("V"+str(input_prop.get()))
 
+def admin_mode():
+    global GUI_mode
+    if (GUI_mode.get() == "Administrator Mode"):
+        b_load_cells["state"] = "normal"
+        b_run_pump["state"] = "normal"
+        b_vent_p_res["state"] = "normal"
+        b_vent_c_res["state"] = "normal"
+        prop_label.config(fg="black")
+        prop_value_label.config(fg="black")
+        input_prop["state"] = "normal"
+        prop_set["state"] = "normal"
+        GUI_mode.set("User Mode")
+    else:
+        b_load_cells["state"] = "disabled"
+        b_run_pump["state"] = "disabled"
+        b_vent_p_res["state"] = "disabled"
+        b_vent_c_res["state"] = "disabled"
+        prop_label.config(fg="gray")
+        prop_value_label.config(fg="gray")
+        input_prop["state"] = "disabled"
+        prop_set["state"] = "disabled"
+        GUI_mode.set("Administrator Mode")
+        
 
 # # Connect serial with Arduino
 # ser = serial.Serial('com7', 9600)
@@ -71,6 +102,8 @@ flowrate = tk.DoubleVar()           # To-do
 prop_valve = tk.IntVar()            # To-do
 print_prop_valve = tk.StringVar()
 input_prop = tk.IntVar()
+GUI_mode = tk.StringVar()
+GUI_mode.set("Administrator Mode")
 
 # Status
 display_status = tk.Label(tkTop,
@@ -166,7 +199,8 @@ ad_buttons_height = 4
 b_load_cells = tk.Button(tkTop,
     text="Load\nCells",
     width=ad_buttons_width,
-    height=ad_buttons_height
+    height=ad_buttons_height,
+    state="disabled"
 )
 b_load_cells.grid(row=5,column=0,rowspan=2)
 b_load_cells.bind("<Button-1>", p_load_cells)
@@ -175,7 +209,8 @@ b_load_cells.bind("<ButtonRelease-1>", r_load_cells)
 b_run_pump = tk.Button(tkTop,
     text="Run\nPump",
     width=ad_buttons_width,
-    height=ad_buttons_height
+    height=ad_buttons_height,
+    state="disabled"
 )
 b_run_pump.grid(row=5,column=1,rowspan=2)
 b_run_pump.bind("<Button-1>", p_run_pump)
@@ -184,7 +219,8 @@ b_run_pump.bind("<ButtonRelease-1>", r_run_pump)
 b_vent_p_res = tk.Button(tkTop,
     text="Vent\nPressure\nReservoir",
     width=ad_buttons_width,
-    height=ad_buttons_height
+    height=ad_buttons_height,
+    state="disabled"
 )
 b_vent_p_res.grid(row=5,column=2,rowspan=2)
 b_vent_p_res.bind("<Button-1>", p_vent_p_res)
@@ -193,34 +229,47 @@ b_vent_p_res.bind("<ButtonRelease-1>", r_vent_p_res)
 b_vent_c_res = tk.Button(tkTop,
     text="Vent\nCell\nReservoir",
     width=ad_buttons_width,
-    height=ad_buttons_height
+    height=ad_buttons_height,
+    state="disabled"
 )
 b_vent_c_res.grid(row=5,column=3,rowspan=2)
 b_vent_c_res.bind("<Button-1>", p_vent_c_res)
 b_vent_c_res.bind("<ButtonRelease-1>", r_vent_c_res)
 
-tk.Label(tkTop,
+prop_label = tk.Label(tkTop,
     text="Proportional Valve",
-    font=("Arial", 10)
-).grid(row=5,column=4)
+    font=("Arial", 10),
+    fg="gray"
+)
+prop_label.grid(row=5,column=4)
 print_prop_valve.set(str(prop_valve.get())+' %')
-tk.Label(tkTop,
+prop_value_label = tk.Label(tkTop,
     textvariable=print_prop_valve,
-    font=("Arial", 10)
-).grid(row=5,column=5)
+    font=("Arial", 10),
+    fg="gray"
+)
+prop_value_label.grid(row=5,column=5)
 
 input_prop = tk.Entry(tkTop,
     width=8,
     font=("Arial", 10),
-    borderwidth=5
+    borderwidth=5,
+    state="disabled"
 )
 input_prop.grid(row=6,column=4)
-tk.Button(tkTop,
+prop_set = tk.Button(tkTop,
     text="set",
     command=set_prop_valve,
-    padx=10
-).grid(row=6,column=5)
+    padx=10,
+    state="disabled"
+)
+prop_set.grid(row=6,column=5)
 
-
+# Admin mode deactivation/activation
+tk.Button(tkTop,
+    textvariable=GUI_mode,
+    command=admin_mode,
+    width=20
+).grid(row=7,column=2,columnspan=2)
 
 tk.mainloop()

@@ -17,15 +17,12 @@ def start():
     display_status.config(fg="black",bg="white")
 
     # Send starting sign, inputType, and input to Arduino
-    serialSend("S")
     if (inputType.get()):
         # Selected Flowrate
-        serialSend(inputType.get())
-        serialSend(input_flowrate.get())
+        serialSend("S"+str(inputType.get())+input_flowrate.get())
     else:
         # Selected Pressure
-        serialSend(inputType.get())
-        serialSend(input_pressure.get())
+        serialSend("S"+str(inputType.get())+input_pressure.get())
 
 def p_load_cells(event):
     serialSend("C")
@@ -51,9 +48,8 @@ def p_vent_c_res(event):
 def r_vent_c_res(event):
     serialSend("BR")
 
-def set_prop_valve(event):
-    serialSend("V")
-    serialSend(input_prop.get())
+def set_prop_valve():
+    serialSend("V"+str(input_prop.get()))
 
 
 # # Connect serial with Arduino
@@ -67,12 +63,12 @@ tkTop.title("Pump-on-a-Chip   v.1.1")
 
 # Global variables
 inputType = tk.IntVar()
-status = tk.StringVar()
+status = tk.StringVar()             # To-do
 status.set("Ready")
-resP = tk.DoubleVar()
-cellP = tk.DoubleVar()
-flowrate = tk.DoubleVar()
-prop_valve = tk.IntVar()
+resP = tk.DoubleVar()               # To-do
+cellP = tk.DoubleVar()              # To-do
+flowrate = tk.DoubleVar()           # To-do
+prop_valve = tk.IntVar()            # To-do
 print_prop_valve = tk.StringVar()
 input_prop = tk.IntVar()
 
@@ -96,9 +92,9 @@ tk.Radiobutton(tkTop,
     font=("Arial", 10),
     variable=inputType,
     value=0
-).grid(row=1,column=0,columnspan=2)
+).grid(row=1,column=1)
 input_pressure = tk.Entry(tkTop,
-    width=15,
+    width=13,
     font=("Arial", 10),
     borderwidth=5
 )
@@ -114,9 +110,9 @@ tk.Radiobutton(tkTop,
     font=("Arial", 10),
     variable=inputType,
     value=1
-).grid(row=2,column=0,columnspan=2)
+).grid(row=2,column=1)
 input_flowrate = tk.Entry(tkTop,
-    width=15,
+    width=13,
     font=("Arial", 10),
     borderwidth=5
 )
@@ -130,9 +126,9 @@ tk.Label(tkTop,
 tk.Button(tkTop,
     text="START",
     command=start,
-    padx=30,
+    padx=20,
     pady=20
-).grid(row=1,column=4,rowspan=2,columnspan=2)
+).grid(row=1,column=4,rowspan=2)
 
 # Display sensor values
 tk.Label(tkTop,
@@ -165,39 +161,41 @@ tk.Label(tkTop,
 ).grid(row=4,column=4,columnspan=2)
 
 # Administrator mode - manual control buttons
+ad_buttons_width = 12
+ad_buttons_height = 4
 b_load_cells = tk.Button(tkTop,
     text="Load\nCells",
-    width=10,
-    height=3
+    width=ad_buttons_width,
+    height=ad_buttons_height
 )
-b_load_cells.grid(row=5,column=0,rowspan=3)
+b_load_cells.grid(row=5,column=0,rowspan=2)
 b_load_cells.bind("<Button-1>", p_load_cells)
 b_load_cells.bind("<ButtonRelease-1>", r_load_cells)
 
 b_run_pump = tk.Button(tkTop,
     text="Run\nPump",
-    width=10,
-    height=3
+    width=ad_buttons_width,
+    height=ad_buttons_height
 )
-b_run_pump.grid(row=5,column=1,rowspan=3)
+b_run_pump.grid(row=5,column=1,rowspan=2)
 b_run_pump.bind("<Button-1>", p_run_pump)
 b_run_pump.bind("<ButtonRelease-1>", r_run_pump)
 
 b_vent_p_res = tk.Button(tkTop,
     text="Vent\nPressure\nReservoir",
-    width=10,
-    height=3
+    width=ad_buttons_width,
+    height=ad_buttons_height
 )
-b_vent_p_res.grid(row=5,column=2,rowspan=3)
+b_vent_p_res.grid(row=5,column=2,rowspan=2)
 b_vent_p_res.bind("<Button-1>", p_vent_p_res)
 b_vent_p_res.bind("<ButtonRelease-1>", r_vent_p_res)
 
 b_vent_c_res = tk.Button(tkTop,
     text="Vent\nCell\nReservoir",
-    width=10,
-    height=3
+    width=ad_buttons_width,
+    height=ad_buttons_height
 )
-b_vent_c_res.grid(row=5,column=3,rowspan=3)
+b_vent_c_res.grid(row=5,column=3,rowspan=2)
 b_vent_c_res.bind("<Button-1>", p_vent_c_res)
 b_vent_c_res.bind("<ButtonRelease-1>", r_vent_c_res)
 
@@ -209,59 +207,20 @@ print_prop_valve.set(str(prop_valve.get())+' %')
 tk.Label(tkTop,
     textvariable=print_prop_valve,
     font=("Arial", 10)
-).grid(row=6,column=4)
+).grid(row=5,column=5)
 
-b_vent_c_res = tk.Button(tkTop,
-    text="Run\nPump",
-    width=10,
-    height=3
+input_prop = tk.Entry(tkTop,
+    width=8,
+    font=("Arial", 10),
+    borderwidth=5
 )
-b_load_cells.grid(row=5,column=1,rowspan=2)
-b_load_cells.bind("<Button-1>", p_run_pump)
-b_load_cells.bind("<ButtonRelease-1>", r_run_pump)
+input_prop.grid(row=6,column=4)
+tk.Button(tkTop,
+    text="set",
+    command=set_prop_valve,
+    padx=10
+).grid(row=6,column=5)
 
 
-# varLabel = tk.StringVar()
-# tkLabel = tk.Label(textvariable=varLabel, )
-# tkLabel.pack()
-
-# varLabel2 = tk.IntVar()
-# tkLabel2 = tk.Label(textvariable=varLabel2, )
-# tkLabel2.pack()
-
-# button1 = tk.IntVar()
-# button1state = tk.Button(tkTop,
-#     text="ON",
-#     command=set_button1_state,
-#     height = 4,
-#     fg = "black",
-#     width = 8,
-#     bd = 5,
-#     activebackground='green'
-# )
-# button1state.pack(side='top', ipadx=10, padx=10, pady=15)
-
-# button2 = tk.IntVar()
-# button2state = tk.Button(tkTop,
-#     text="OFF",
-#     command=set_button2_state,
-#     height = 4,
-#     fg = "black",
-#     width = 8,
-#     bd = 5
-# )
-# button2state.pack(side='top', ipadx=10, padx=10, pady=15)
-
-# tkButtonQuit = tk.Button(
-#     tkTop,
-#     text="Quit",
-#     command=quit,
-#     height = 4,
-#     fg = "black",
-#     width = 8,
-#     bg = 'yellow',
-#     bd = 5
-# )
-# tkButtonQuit.pack(side='top', ipadx=10, padx=10, pady=15)
 
 tk.mainloop()

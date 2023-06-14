@@ -91,7 +91,7 @@ def admin_mode():
         
 def arduino_handler():
     while True:
-        data = ser.readline().strip()
+        data = ser.readline().decode().strip()
         match data[0]:
             case "P":
                 resP.set(data[1:])
@@ -102,9 +102,11 @@ def arduino_handler():
             case "V":
                 if GUI_mode.get() == "User Mode":
                     prop_valve.set(data[1:])
+                    print_prop_valve.set(str(prop_valve.get())+' %')
 
-# # Connect serial with Arduino
-ser = serial.Serial('COM7', 9600)
+
+# Connect serial with Arduino
+ser = serial.Serial('COM6', 9600)
 print("Reset Arduino")
 time.sleep(3)
 
@@ -116,10 +118,10 @@ tkTop.title("Pump-on-a-Chip   v.1.1")
 inputType = tk.IntVar()
 status = tk.StringVar()             # To-do
 status.set("Ready")
-resP = tk.DoubleVar()               # To-do
-cellP = tk.DoubleVar()              # To-do
-flowrate = tk.DoubleVar()           # To-do
-prop_valve = tk.DoubleVar()            # To-do
+resP = tk.DoubleVar()
+cellP = tk.DoubleVar()
+flowrate = tk.DoubleVar()
+prop_valve = tk.DoubleVar()
 print_prop_valve = tk.StringVar()
 input_prop = tk.IntVar()
 GUI_mode = tk.StringVar()
@@ -271,6 +273,7 @@ print_prop_valve.set(str(prop_valve.get())+' %')
 prop_value_label = tk.Label(tkTop,
     textvariable=print_prop_valve,
     font=("Arial", 10),
+    width=7,
     fg="gray"
 )
 prop_value_label.grid(row=5,column=5)

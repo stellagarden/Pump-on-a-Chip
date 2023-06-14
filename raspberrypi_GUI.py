@@ -3,6 +3,10 @@ import time
 import tkinter as tk
 
 # Define buttons
+def serialSend(a):
+    # ser.write(bytes(a,'UTF-8'))
+    print("Send: "+str(a))
+
 def start():
     global inputType
     global status
@@ -12,19 +16,16 @@ def start():
     status.set("Pressurizing")
     display_status.config(fg="black",bg="white")
 
-    # Send inputType and input to Arduino
+    # Send starting sign, inputType, and input to Arduino
+    serialSend("S")
     if (inputType.get()):
         # Selected Flowrate
-        # ser.write(bytes(inputType.get(),'UTF-8'))
-        # ser.write(bytes(input_flowrate.get(),'UTF-8'))
-        print("Send: "+str(inputType.get()))
-        print("Send: "+input_flowrate.get())
+        serialSend(inputType.get())
+        serialSend(input_flowrate.get())
     else:
         # Selected Pressure
-        # ser.write(bytes(inputType.get(),'UTF-8'))
-        # ser.write(bytes(input_pressure.get(),'UTF-8'))
-        print("Send: "+str(inputType.get()))
-        print("Send: "+input_pressure.get())
+        serialSend(inputType.get())
+        serialSend(input_pressure.get())
 
 # # Connect serial with Arduino
 # ser = serial.Serial('com7', 9600)

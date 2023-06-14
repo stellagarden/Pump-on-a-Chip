@@ -1,6 +1,7 @@
 import serial
 import time
 import tkinter as tk
+import threading
 
 # Define buttons
 def serialSend(a):
@@ -10,7 +11,7 @@ def serialSend(a):
 def start():
     global status
     # Change status
-    status.set("Pressure Reservoir Checking")
+    status.set("Pressurizing")
     display_status.config(fg="black",bg="white")
 
     # Send starting sign, inputType, and input to Arduino
@@ -88,11 +89,24 @@ def admin_mode():
         prop_set["state"] = "disabled"
         GUI_mode.set("Administrator Mode")
         
+def arduino_handler():
+    while True:
+        data = ser.readline().strip()
+        match data[0]:
+            case "P":
+                resP.set(data[1:])
+            case "C":
+                cellP.set(data[1:])
+            case "F":
+                flowrate.set(data[1:])
+            case "V":
+                if GUI_mode.get() == "User Mode":
+                    prop_valve.set(data[1:])
 
 # # Connect serial with Arduino
-# ser = serial.Serial('com7', 9600)
-# print("Reset Arduino")
-# time.sleep(3)
+ser = serial.Serial('COM7', 9600)
+print("Reset Arduino")
+time.sleep(3)
 
 # Make GUI
 tkTop = tk.Tk()
@@ -105,7 +119,7 @@ status.set("Ready")
 resP = tk.DoubleVar()               # To-do
 cellP = tk.DoubleVar()              # To-do
 flowrate = tk.DoubleVar()           # To-do
-prop_valve = tk.IntVar()            # To-do
+prop_valve = tk.DoubleVar()            # To-do
 print_prop_valve = tk.StringVar()
 input_prop = tk.IntVar()
 GUI_mode = tk.StringVar()
@@ -283,4 +297,5 @@ tk.Button(tkTop,
     width=20
 ).grid(row=7,column=2,columnspan=2)
 
+threading.Thread(target=arduino_handler, daemon=True).start()
 tk.mainloop()

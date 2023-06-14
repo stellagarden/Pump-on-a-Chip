@@ -8,10 +8,7 @@ def serialSend(a):
     print("Send: "+str(a))
 
 def start():
-    global inputType
     global status
-    global input_pressure
-    global input_flowrate
     # Change status
     status.set("Pressure Reservoir Checking")
     display_status.config(fg="black",bg="white")
@@ -23,6 +20,15 @@ def start():
     else:
         # Selected Pressure
         serialSend("S"+str(inputType.get())+input_pressure.get())
+
+    # Deactivate inputs
+    rb_pressure["state"] = "disabled"
+    input_pressure["state"] = "disabled"
+    unit_pressure.config(fg="gray")
+    rb_flowrate["state"] = "disabled"
+    input_flowrate["state"] = "disabled"
+    unit_flowrate.config(fg="gray")
+    b_start["state"] = "disabled"
 
 def p_load_cells(event):
     if GUI_mode.get() == "User Mode":
@@ -120,48 +126,53 @@ display_status = tk.Label(tkTop,
 display_status.grid(row=0,column=0,columnspan=6)
 
 # Initial input - Pressure
-tk.Radiobutton(tkTop,
+rb_pressure = tk.Radiobutton(tkTop,
     text="Pressure: ",
     font=("Arial", 10),
     variable=inputType,
     value=0
-).grid(row=1,column=1)
+)
+rb_pressure.grid(row=1,column=1)
 input_pressure = tk.Entry(tkTop,
     width=13,
     font=("Arial", 10),
     borderwidth=5
 )
 input_pressure.grid(row=1,column=2)
-tk.Label(tkTop,
+unit_pressure = tk.Label(tkTop,
     text="mbar",
     font=("Arial", 10)
-).grid(row=1,column=3)
+)
+unit_pressure.grid(row=1,column=3)
 
 # Initial input - flowrate
-tk.Radiobutton(tkTop,
+rb_flowrate = tk.Radiobutton(tkTop,
     text="Flowrate: ",
     font=("Arial", 10),
     variable=inputType,
     value=1
-).grid(row=2,column=1)
+)
+rb_flowrate.grid(row=2,column=1)
 input_flowrate = tk.Entry(tkTop,
     width=13,
     font=("Arial", 10),
     borderwidth=5
 )
 input_flowrate.grid(row=2,column=2)
-tk.Label(tkTop,
+unit_flowrate = tk.Label(tkTop,
     text="ml/min",
     font=("Arial", 10)
-).grid(row=2,column=3)
+)
+unit_flowrate.grid(row=2,column=3)
 
 # Start button
-tk.Button(tkTop,
+b_start = tk.Button(tkTop,
     text="START",
     command=start,
     padx=20,
     pady=20
-).grid(row=1,column=4,rowspan=2)
+)
+b_start.grid(row=1,column=4,rowspan=2)
 
 # Display sensor values
 tk.Label(tkTop,

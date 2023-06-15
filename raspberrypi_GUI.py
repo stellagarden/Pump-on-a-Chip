@@ -77,18 +77,18 @@ def arduino_handler():
     global status
     while True:
         data = ser.readline().decode().strip()
-        # print("Receive: "+data)
+        print("Receive: "+data)
         match data[0]:
             # Sensor values update
             case "P":
-                resP.set(data[1:])
+                resP.set(float(data[1:]))
             case "C":
-                cellP.set(data[1:])
+                cellP.set(float(data[1:]))
             case "F":
-                flowrate.set(data[1:])
+                flowrate.set(float(data[1:]))
             case "V":
                 if GUI_mode.get() == "User Mode":
-                    prop_valve.set(data[1:])
+                    prop_valve.set(float(data[1:]))
                     print_prop_valve.set(str(prop_valve.get())+' %')
             # State change
             case "S":
@@ -117,7 +117,7 @@ def arduino_handler():
                 print("Receive: "+data)
 
 # Connect serial with Arduino
-ser = serial.Serial('COM6', 9600)
+ser = serial.Serial('COM3', 9600)
 print("Reset Arduino")
 time.sleep(3)
 

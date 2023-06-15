@@ -34,6 +34,7 @@ uint16_t raw_cellP = 0;
 float cellP = 0;
 float flowrate = 0.0;
 float prop = 0.0;
+float prop_target;
 
 enum {Ready, Admin_C, Admin_P, Admin_A, Admin_B, Pressurizing, CellLoading, Running, Finish};
 unsigned char state;
@@ -58,7 +59,6 @@ void setup() {
   softwarei2c.endTransmission();
   // Flow rate
   SLF3X.init();
-  avgFlow.begin();
 }
 
 void loop() {
@@ -73,11 +73,11 @@ void loop() {
                 // Start button
                 if (data.charAt(1) == '0'){
                   // Pressure input
-                  double pressure_target = data.substring(2).toDouble();
+                  float pressure_target = data.substring(2).toFloat();
                   Serial.println("*Set pressure target as "+String(pressure_target));
                 } else {
                   // Flow rate input
-                  double flowrate_target = data.substring(2).toDouble();
+                  float flowrate_target = data.substring(2).toFloat();
                   Serial.println("*Set flow rate target as "+String(flowrate_target));
                 }
                 state = Pressurizing;
@@ -108,7 +108,7 @@ void loop() {
                 break;
               case 'V':
                 // Proportional Valve
-                double prop_target = data.substring(1).toDouble();
+                prop_target = data.substring(1).toFloat();
                 analogWrite(PROPOR_PIN, int(prop_target*255/100));
                 break;
             }
@@ -199,5 +199,7 @@ void loop() {
   }
   
   Serial.println("V"+String(prop_target));
+
+  delay(100);
   
 }

@@ -129,7 +129,6 @@ def arduino_handler():
                         input_flowrate["state"] = "normal"
                         unit_flowrate.config(fg="black")
                         b_start["state"] = "normal"
-                    
 
 # Connect serial with Arduino
 ser = serial.Serial('COM6', 9600)
@@ -142,7 +141,7 @@ tkTop.title("Pump-on-a-Chip   v.1.1")
 
 # Global variables
 inputType = tk.IntVar()
-status = tk.StringVar()             # To-do
+status = tk.StringVar()
 status.set("Ready")
 resP = tk.DoubleVar()
 cellP = tk.DoubleVar()

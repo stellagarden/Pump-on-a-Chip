@@ -6,7 +6,7 @@ import threading
 # Define buttons
 def serialSend(a):
     ser.write(bytes(a,'UTF-8'))
-    print("Sent: "+str(a))
+    print("Send: "+str(a))
 
 def start():
     global status
@@ -31,37 +31,21 @@ def start():
     unit_flowrate.config(fg="gray")
     b_start["state"] = "disabled"
 
-def p_load_cells(event):
+def load_cells():
     if GUI_mode.get() == "User Mode":
         serialSend("C")
 
-def r_load_cells(event):
-    if GUI_mode.get() == "User Mode":
-        serialSend("CR")
-
-def p_run_pump(event):
+def run_pump():
     if GUI_mode.get() == "User Mode":
         serialSend("P")
 
-def r_run_pump(event):
-    if GUI_mode.get() == "User Mode":
-        serialSend("PR")
-
-def p_vent_p_res(event):
+def vent_p_res():
     if GUI_mode.get() == "User Mode":
         serialSend("A")
 
-def r_vent_p_res(event):
-    if GUI_mode.get() == "User Mode":
-        serialSend("AR")
-
-def p_vent_c_res(event):
+def vent_c_res():
     if GUI_mode.get() == "User Mode":
         serialSend("B")
-
-def r_vent_c_res(event):
-    if GUI_mode.get() == "User Mode":
-        serialSend("BR")
 
 def set_prop_valve():
     serialSend("V"+str(input_prop.get()))
@@ -93,7 +77,7 @@ def arduino_handler():
     global status
     while True:
         data = ser.readline().decode().strip()
-        # print("Received: "+data)
+        # print("Receive: "+data)
         match data[0]:
             # Sensor values update
             case "P":
@@ -129,6 +113,8 @@ def arduino_handler():
                         input_flowrate["state"] = "normal"
                         unit_flowrate.config(fg="black")
                         b_start["state"] = "normal"
+            case _:
+                print("Receive: "+data)
 
 # Connect serial with Arduino
 ser = serial.Serial('COM6', 9600)
@@ -250,43 +236,39 @@ ad_buttons_width = 12
 ad_buttons_height = 4
 b_load_cells = tk.Button(tkTop,
     text="Load\nCells",
+    command=load_cells,
     width=ad_buttons_width,
     height=ad_buttons_height,
     state="disabled"
 )
 b_load_cells.grid(row=5,column=0,rowspan=2)
-b_load_cells.bind("<Button-1>", p_load_cells)
-b_load_cells.bind("<ButtonRelease-1>", r_load_cells)
 
 b_run_pump = tk.Button(tkTop,
     text="Run\nPump",
+    command=run_pump,
     width=ad_buttons_width,
     height=ad_buttons_height,
     state="disabled"
 )
 b_run_pump.grid(row=5,column=1,rowspan=2)
-b_run_pump.bind("<Button-1>", p_run_pump)
-b_run_pump.bind("<ButtonRelease-1>", r_run_pump)
 
 b_vent_p_res = tk.Button(tkTop,
     text="Vent\nPressure\nReservoir",
     width=ad_buttons_width,
+    command=vent_p_res,
     height=ad_buttons_height,
     state="disabled"
 )
 b_vent_p_res.grid(row=5,column=2,rowspan=2)
-b_vent_p_res.bind("<Button-1>", p_vent_p_res)
-b_vent_p_res.bind("<ButtonRelease-1>", r_vent_p_res)
 
 b_vent_c_res = tk.Button(tkTop,
     text="Vent\nCell\nReservoir",
+    command=vent_c_res,
     width=ad_buttons_width,
     height=ad_buttons_height,
     state="disabled"
 )
 b_vent_c_res.grid(row=5,column=3,rowspan=2)
-b_vent_c_res.bind("<Button-1>", p_vent_c_res)
-b_vent_c_res.bind("<ButtonRelease-1>", r_vent_c_res)
 
 prop_label = tk.Label(tkTop,
     text="Proportional Valve",

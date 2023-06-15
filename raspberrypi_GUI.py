@@ -5,8 +5,8 @@ import threading
 
 # Define buttons
 def serialSend(a):
-    # ser.write(bytes(a,'UTF-8'))
-    print("Send: "+str(a))
+    ser.write(bytes(a,'UTF-8'))
+    print("Sent: "+str(a))
 
 def start():
     global status
@@ -90,9 +90,12 @@ def admin_mode():
         GUI_mode.set("Administrator Mode")
         
 def arduino_handler():
+    global status
     while True:
         data = ser.readline().decode().strip()
+        # print("Received: "+data)
         match data[0]:
+            # Sensor values update
             case "P":
                 resP.set(data[1:])
             case "C":
@@ -103,7 +106,30 @@ def arduino_handler():
                 if GUI_mode.get() == "User Mode":
                     prop_valve.set(data[1:])
                     print_prop_valve.set(str(prop_valve.get())+' %')
-
+            # State change
+            case "S":
+                match data[1]:
+                    case "2":
+                        status.set("Cell Loading")
+                        display_status.config(fg="black",bg="white")
+                    case "3":
+                        status.set("Running")
+                        display_status.config(fg="red",bg="white")
+                    case "4":
+                        status.set("Finish")
+                        display_status.config(fg="blue",bg="white")
+                    case "0":
+                        status.set("Ready")
+                        display_status.config(fg="white",bg="green")
+                        # Activate inputs
+                        rb_pressure["state"] = "normal"
+                        input_pressure["state"] = "normal"
+                        unit_pressure.config(fg="black")
+                        rb_flowrate["state"] = "normal"
+                        input_flowrate["state"] = "normal"
+                        unit_flowrate.config(fg="black")
+                        b_start["state"] = "normal"
+                    
 
 # Connect serial with Arduino
 ser = serial.Serial('COM6', 9600)
@@ -134,7 +160,7 @@ display_status = tk.Label(tkTop,
     padx=30,
     pady=5,
     relief="solid",
-    fg="black",
+    fg="white",
     bg="green",
     width=20,
     height=1

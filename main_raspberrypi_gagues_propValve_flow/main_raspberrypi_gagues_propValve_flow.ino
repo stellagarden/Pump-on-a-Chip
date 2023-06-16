@@ -12,11 +12,11 @@
 // Pinch
 #define PROPOR_PIN A0
 #define PUMP_PIN 1
-// Gauge1 4,5 | Gauge2 2,3 | Serial 6,7
-#define SOLPINCH_PIN 8
-#define PUMP_SOL_PIN 9
-#define P_VENT_PIN 9
-#define C_VENT_PIN 11
+// Gauge1 4,5 | Gauge2 2,3
+#define SOLPINCH_PIN 6
+#define PUMP_SOL_PIN 7
+#define P_VENT_PIN 8
+#define C_VENT_PIN 9
 const float pumpTimer = 3000;
 const unsigned long cellLoadTimer = 2000;
 const unsigned long ventTimer = 1000;

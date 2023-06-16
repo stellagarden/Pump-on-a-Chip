@@ -20,7 +20,7 @@ void setup() {
 }
 
 void loop() {
-  analogWrite(PROPOR_PIN, 250);
+  analogWrite(PROPOR_PIN, open);
   digitalWrite(LED_BUILTIN, HIGH);
   Serial.println(open);
   delay(500);

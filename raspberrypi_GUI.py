@@ -77,7 +77,7 @@ def arduino_handler():
     global status
     while True:
         data = ser.readline().decode().strip()
-        print("Receive: "+data)
+        # print("Receive: "+data)
         match data[0]:
             # Sensor values update
             case "P":
@@ -142,7 +142,7 @@ GUI_mode.set("Administrator Mode")
 display_status = tk.Label(tkTop,
     textvariable=status,
     font=("Arial", 20),
-    padx=30,
+    padx=40,
     pady=5,
     relief="solid",
     fg="white",

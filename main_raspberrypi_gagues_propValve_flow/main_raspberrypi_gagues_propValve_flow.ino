@@ -15,11 +15,12 @@
 // Gauge1 4,5 | Gauge2 2,3 | Serial 6,7
 #define SOLPINCH_PIN 8
 #define PUMP_SOL_PIN 9
-#define P_VENT_PIN 10
+#define P_VENT_PIN 9
 #define C_VENT_PIN 11
-const float pumpTarget = 3000;
+const float pumpTimer = 3000;
 const unsigned long cellLoadTimer = 2000;
 const unsigned long ventTimer = 1000;
+const unsigned long runningTimer = 10000;
 
 // System
 #define accumulatedMillis millis() - timerMillis
@@ -33,21 +34,23 @@ float resP = 0;
 uint16_t raw_cellP = 0;
 float cellP = 0;
 float flowrate = 0.0;
-float prop = 0.0;
-float prop_target;
-
-enum {Ready, Admin_C, Admin_P, Admin_A, Admin_B, Pressurizing, CellLoading, Running, Finish};
+float prop_target = 0.0;
+int mode;
+float target;
 unsigned char state;
+enum {Ready, Admin_C, Admin_P, Admin_A, Admin_B, Pressurizing, CellLoading, Running, Finish};
 
 void setup() {
   Serial.begin(9600);
   state = Ready;
+  digitalWrite(LED_BUILTIN, OUTPUT);
   
   pinMode(PUMP_PIN, OUTPUT);
   pinMode(SOLPINCH_PIN, OUTPUT);
   pinMode(PUMP_SOL_PIN, OUTPUT);
   pinMode(P_VENT_PIN, OUTPUT);
   pinMode(C_VENT_PIN, OUTPUT);
+  pinMode(PROPOR_PIN, OUTPUT);
   analogWriteResolution(10);
   // Gauge1
   Wire.begin();
@@ -59,6 +62,9 @@ void setup() {
   softwarei2c.endTransmission();
   // Flow rate
   SLF3X.init();
+
+  // Reset valves
+  analogWrite(PROPOR_PIN,250);
 }
 
 void loop() {
@@ -71,60 +77,65 @@ void loop() {
             switch (data.charAt(0)){
               case 'S':
                 // Start button
-                if (data.charAt(1) == '0'){
-                  // Pressure input
-                  float pressure_target = data.substring(2).toFloat();
-                  Serial.println("*Set pressure target as "+String(pressure_target));
-                } else {
-                  // Flow rate input
-                  float flowrate_target = data.substring(2).toFloat();
-                  Serial.println("*Set flow rate target as "+String(flowrate_target));
-                }
+                mode = data.charAt(1)-'0';      // 0: pressure, 1: flowrate
+                target = data.substring(2).toFloat();
+                // To-do: Run pump and pressurize the pressure reservoir
+                digitalWrite(PUMP_PIN, HIGH);
+                digitalWrite(PUMP_SOL_PIN, LOW);     // open
+                // /////////////////////////////////////////////////////
+                timerMillis = millis();
                 state = Pressurizing;
                 break;
               case 'C':
                 // Cell Loading Pinch valve
+                digitalWrite(SOLPINCH_PIN, HIGH);     // open
+                digitalWrite(LED_BUILTIN, HIGH);
                 timerMillis = millis();
-                digitalWrite(SOLPINCH_PIN, LOW);     // open
                 state = Admin_C;
                 break;
               case 'P':
                 // Pump
                 digitalWrite(PUMP_PIN, HIGH);
                 digitalWrite(PUMP_SOL_PIN, LOW);     // open
+                digitalWrite(LED_BUILTIN, HIGH);
+                timerMillis = millis();
                 state = Admin_P;
                 break;
               case 'A':
                 // Vent Pressure Reservoir
-                timerMillis = millis();
                 digitalWrite(P_VENT_PIN, LOW);     // open
+                timerMillis = millis();
                 state = Admin_A;
                 break;
               case 'B':
                 // Vent Cell Reservoir
-                timerMillis = millis();
                 digitalWrite(C_VENT_PIN, LOW);     // open
+                timerMillis = millis();
                 state = Admin_B;
                 break;
               case 'V':
                 // Proportional Valve
                 prop_target = data.substring(1).toFloat();
-                analogWrite(PROPOR_PIN, int(prop_target*255/100));
+                int prop_int = prop_target*255/100;
+                Serial.println("*Set prop valve as "+String(prop_int));
+                analogWrite(PROPOR_PIN, prop_int);
                 break;
             }
       }
       break;
     case Admin_C:
       if (accumulatedMillis > cellLoadTimer) {
+        digitalWrite(LED_BUILTIN, LOW);
+        digitalWrite(SOLPINCH_PIN, LOW);     // close
         state = Ready;
-        digitalWrite(SOLPINCH_PIN, HIGH);     // close
       }
       break;
     case Admin_P:
-      if (resP > pumpTarget) {
+      if (accumulatedMillis > pumpTimer) {
         state = Ready;
         digitalWrite(PUMP_PIN, LOW);
         digitalWrite(PUMP_SOL_PIN, HIGH);     // close
+        digitalWrite(LED_BUILTIN, LOW);
       }
       break;
     case Admin_A:
@@ -140,30 +151,45 @@ void loop() {
       }
       break;
     case Pressurizing:
-      if (accumulatedMillis > 2000){
-        state = CellLoading;
+      if (accumulatedMillis > pumpTimer){
+        digitalWrite(PUMP_PIN, LOW);
+        digitalWrite(PUMP_SOL_PIN, HIGH);     // close
         Serial.println("S2");
+        digitalWrite(SOLPINCH_PIN, HIGH);     // open
+        digitalWrite(LED_BUILTIN, HIGH);
+        state = CellLoading;
         timerMillis = millis();
       }
       break;
     case CellLoading:
-      if (accumulatedMillis > 2000){
-        state = Running;
+      if (accumulatedMillis > cellLoadTimer){
         Serial.println("S3");
+        digitalWrite(SOLPINCH_PIN, LOW);     // close
+        digitalWrite(LED_BUILTIN, LOW);
+        state = Running;
         timerMillis = millis();
       }
       break;
     case Running:
-      if (accumulatedMillis > 2000){
-        state = Finish;
+      // To-do: Make the target pressure in the cell reservoir or the flowrate
+      //
+      //
+      //
+      // ///////////////////////////////////////////////////
+      if (accumulatedMillis > runningTimer){
         Serial.println("S4");
+        digitalWrite(P_VENT_PIN, LOW);     // open
+        digitalWrite(C_VENT_PIN, LOW);     // open
+        state = Finish;
         timerMillis = millis();
       }
       break;
     case Finish:
-      if (accumulatedMillis > 2000){
-        state = Ready;
+      if (accumulatedMillis > ventTimer){
         Serial.println("S0");
+        digitalWrite(P_VENT_PIN, HIGH);     // close
+        digitalWrite(C_VENT_PIN, HIGH);     // close
+        state = Ready;
         timerMillis = millis();
       }
       break;

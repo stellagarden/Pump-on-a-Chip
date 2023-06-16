@@ -21,11 +21,11 @@ void setup() {
 
 void loop() {
   analogWrite(PROPOR_PIN, 250);
-  // digitalWrite(LED_BUILTIN, HIGH);
-  // Serial.println(open);
-  // delay(500);
-  // digitalWrite(LED_BUILTIN, LOW);
-  // open = open + 20;
-  // if (open > 250) open = 0;
+  digitalWrite(LED_BUILTIN, HIGH);
+  Serial.println(open);
+  delay(500);
+  digitalWrite(LED_BUILTIN, LOW);
+  open = open + 20;
+  if (open > 250) open = 0;
   delay(1500);
 }

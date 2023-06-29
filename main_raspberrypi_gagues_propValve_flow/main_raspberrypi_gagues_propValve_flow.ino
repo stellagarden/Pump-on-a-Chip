@@ -11,12 +11,12 @@
 
 // Pinch
 #define PROPOR_PIN A0
-#define PUMP_PIN 1
+#define PUMP_PIN 6
 // Gauge1 4,5 | Gauge2 2,3
-#define SOLPINCH_PIN 6
-#define PUMP_SOL_PIN 7
-#define P_VENT_PIN 8
-#define C_VENT_PIN 9
+#define SOLPINCH_PIN 7
+#define PUMP_SOL_PIN 8
+#define P_VENT_PIN 9
+#define C_VENT_PIN 10
 const float pumpTimer = 4000;
 const unsigned long cellLoadTimer = 2000;
 const unsigned long ventTimer = 3000;
@@ -118,7 +118,7 @@ void loop() {
               case 'V':
                 // Proportional Valve
                 prop_target = data.substring(1).toFloat();
-                int prop_int = prop_target*255/100;
+                int prop_int = prop_target*1023/100;
                 Serial.println("*Set prop valve as "+String(prop_int));
                 analogWrite(PROPOR_PIN, prop_int);
                 break;

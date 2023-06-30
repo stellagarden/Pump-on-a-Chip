@@ -195,8 +195,6 @@ void loop() {
           analogWrite(PROPOR_PIN, 512);
         } else if (cellP - atP < target - 500) {
           analogWrite(PROPOR_PIN, 256);
-        } else if (cellP - atP < target - 250) {
-          analogWrite(PROPOR_PIN, 128);
         } else if (cellP - atP < target - 50) {
           analogWrite(PROPOR_PIN, 0);
         }

@@ -10,7 +10,7 @@
 #include "sensirion-lf.h"
 
 // Pinch
-#define PROPOR_PIN A0
+#define PROPOR_PIN 1
 #define PUMP_PIN 6
 // Gauge1 4,5 | Gauge2 2,3
 #define SOLPINCH_PIN 7
@@ -21,7 +21,7 @@ const float pResTarget = 3000.0;
 const unsigned long cellLoadTimer = 2000;
 const float ventTarget = 1100.0;        // Stop venting 1s after reaching this value
 const unsigned long ventTimer = 5000;   // Or stop venting after this time
-const unsigned long runningTimer = 15000;
+const unsigned long runningTimer = 20000;
 
 // System
 #define accumulatedMillis millis() - timerMillis
@@ -162,15 +162,18 @@ void loop() {
         digitalWrite(C_VENT_PIN, CLOSE);
         state = Ready;
       }
+      break;
     case Pressurizing_vent:
       if (accumulatedMillis > 1.0) {
         digitalWrite(P_VENT_PIN, CLOSE);
         digitalWrite(C_VENT_PIN, CLOSE);
-        atP = resP;
+        atP = cellP;
+        Serial.println("*Pat: "+String(atP)+" mbar");
         digitalWrite(PUMP_PIN, HIGH);
         digitalWrite(PUMP_SOL_PIN, OPEN);
         state = Pressurizing;
       }
+      break;
     case Pressurizing:
       if (resP > pResTarget){
         digitalWrite(PUMP_PIN, LOW);
@@ -185,40 +188,39 @@ void loop() {
       if (accumulatedMillis > cellLoadTimer){
         Serial.println("S3");
         digitalWrite(SOLPINCH_PIN, CLOSE);
-        state = Running_cellP;
+        state = Running;
         timerMillis = millis();
       }
       break;
-    case Running_cellP:
-      if (mode == 0) {    // Pressure
-        if (cellP - atP < target - 1000) {
-          analogWrite(PROPOR_PIN, 512);
-        } else if (cellP - atP < target - 500) {
-          analogWrite(PROPOR_PIN, 256);
-        } else if (cellP - atP < target - 50) {
-          analogWrite(PROPOR_PIN, 0);
-        }
-      }
-      // To-do: Make the target flow rate in the cell reservoir
-      else {
-        
-      }
-      // ///////////////////////////////////////////////////
-      state = Running;
     case Running:
       if (accumulatedMillis > runningTimer){
         Serial.println("S4");
-        digitalWrite(P_VENT_PIN, OPEN);
-        digitalWrite(C_VENT_PIN, OPEN);
+        // digitalWrite(P_VENT_PIN, OPEN);
+        // digitalWrite(C_VENT_PIN, OPEN);
         state = Finish;
         timerMillis = millis();
+      } else {
+        if (mode == 0) {    // Pressure
+          if (cellP - atP < target - 200) {
+            analogWrite(PROPOR_PIN, 580);
+          } else if (cellP - atP < target - 30) {
+            analogWrite(PROPOR_PIN, 490);
+          } else {
+            analogWrite(PROPOR_PIN, 0);
+          }
+        }
+        // To-do: Make the target flow rate in the cell reservoir
+        else {
+          
+        }
+        // ///////////////////////////////////////////////////
       }
       break;
     case Finish:
       if (accumulatedMillis > ventTimer){
         Serial.println("S0");
-        digitalWrite(P_VENT_PIN, CLOSE);
-        digitalWrite(C_VENT_PIN, CLOSE);
+        // digitalWrite(P_VENT_PIN, CLOSE);
+        // digitalWrite(C_VENT_PIN, CLOSE);
         state = Ready;
         timerMillis = millis();
       }

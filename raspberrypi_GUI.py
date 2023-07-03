@@ -117,7 +117,7 @@ def arduino_handler():
                 print("Receive: "+data)
 
 # Connect serial with Arduino
-ser = serial.Serial('COM3', 9600)
+ser = serial.Serial('COM6', 9600)
 print("Reset Arduino")
 time.sleep(3)
 

@@ -1,3 +1,10 @@
+#  -----------------------------------------------------------
+#  FileName     : raspberrypi_GUI.ino
+#  Author       : Hyemin Stella Lee
+#  Created      : 06/15/2023
+#  Description  : GUI for controlling Pump-on-a-Chip
+# -----------------------------------------------------------
+
 import serial
 import time
 import tkinter as tk

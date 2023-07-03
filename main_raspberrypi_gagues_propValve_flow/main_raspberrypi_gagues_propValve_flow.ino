@@ -2,7 +2,7 @@
 // FileName     : main_raspberrypi_gagues_propValve_flow.ino
 // Author       : Hyemin Stella Lee
 // Created      : 06/15/2023
-// Description  : The whole system operating based on the protocol
+// Description  : The whole system operating based on the protocol and manual mode
 // -----------------------------------------------------------
 
 #include <Wire.h>
@@ -19,7 +19,7 @@
 #define C_VENT_PIN 10
 const float pResTarget = 3000.0;
 const unsigned long cellLoadTimer = 2000;
-const float ventTarget = 1100.0;        // Stop venting 1s after reaching this value
+const float ventTarget = 1010.0;        // Stop venting 1s after reaching this value
 const unsigned long ventTimer = 5000;   // Or stop venting after this time
 const unsigned long runningTimer = 20000;
 
@@ -169,7 +169,7 @@ void loop() {
         digitalWrite(P_VENT_PIN, CLOSE);
         digitalWrite(C_VENT_PIN, CLOSE);
         atP = cellP;
-        Serial.println("*Pat: "+String(atP)+" mbar");
+        Serial.println("*P_at: "+String(atP)+" mbar");
         digitalWrite(PUMP_PIN, HIGH);
         digitalWrite(PUMP_SOL_PIN, OPEN);
         state = Pressurizing;

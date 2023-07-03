@@ -194,6 +194,10 @@ unit_flowrate = tk.Label(tkTop,
     font=("Arial", 10)
 )
 unit_flowrate.grid(row=2,column=3)
+# flow rate input is deactivated for this point
+rb_flowrate["state"] = "disabled"
+input_flowrate["state"] = "disabled"
+unit_flowrate.config(fg="gray")
 
 # Start button
 b_start = tk.Button(tkTop,

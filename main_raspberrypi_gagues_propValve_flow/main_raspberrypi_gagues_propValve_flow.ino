@@ -39,6 +39,7 @@ float cellP = 0;
 float atP = 1000;
 float flowrate = 0.0;
 float prop_target = 0.0;
+int prop_int = 0;
 int mode;
 float target;
 unsigned char state;
@@ -120,7 +121,7 @@ void loop() {
               case 'V':
                 // Proportional Valve
                 prop_target = data.substring(1).toFloat();
-                int prop_int = prop_target*1023/100;
+                prop_int = prop_target*1023/100;
                 Serial.println("*Set prop valve as "+String(prop_int));
                 analogWrite(PROPOR_PIN, prop_int);
                 break;
@@ -200,14 +201,22 @@ void loop() {
         state = Finish;
         timerMillis = millis();
       } else {
+        int prop_int_nxt = 0;
         if (mode == 0) {    // Pressure
+          // CALIBRATION NEEDED
           if (cellP - atP < target - 200) {
-            analogWrite(PROPOR_PIN, 580);
+            prop_int_nxt = 590;
           } else if (cellP - atP < target - 30) {
-            analogWrite(PROPOR_PIN, 490);
+            prop_int_nxt = 490;
           } else {
-            analogWrite(PROPOR_PIN, 0);
+            prop_int_nxt = 0;
           }
+          if (prop_int_nxt != prop_int){
+            analogWrite(PROPOR_PIN, prop_int_nxt);
+            Serial.println("*Set prop valve as "+String(prop_int_nxt));
+            prop_int = prop_int_nxt;
+          }
+          // ////////////////////////
         }
         // To-do: Make the target flow rate in the cell reservoir
         else {

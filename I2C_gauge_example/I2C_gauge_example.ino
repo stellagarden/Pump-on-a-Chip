@@ -14,7 +14,6 @@ float pressure = 0;
 
 void setup(){
   Serial.begin(9600);
-  Serial1.begin(9600);
   Wire.begin();
   Wire.beginTransmission(GAUGE_ADDR); //Send a request to begin communication with the device at the specified address
   Wire.endTransmission();
@@ -25,16 +24,10 @@ void loop(){
   if (Wire.available() > 0){
     rawdata = Wire.read();
     rawdata = rawdata << 8;
-    pressure = 0.316456*rawdata-1590.23;  // Convert raw data to actual pressure
     rawdata |= Wire.read();
+    pressure = 0.316456*rawdata-1590.23;  // Convert raw data to actual pressure
     Serial.print(pressure);
-    Serial.print(" mbar | P_at + ");
-    Serial.print(pressure-1013.25);
     Serial.println(" mbar");
-    Serial1.print(pressure);
-    Serial1.print(" mbar | P_at + ");
-    Serial1.print(pressure-1013.25);
-    Serial1.println(" mbar");
   }  
-  delay(100);
+  delay(1000);
 }

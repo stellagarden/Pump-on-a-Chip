@@ -9,11 +9,12 @@ import serial
 import time
 import tkinter as tk
 import threading
+import datetime
 
 # Define buttons
 def serialSend(a):
     ser.write(bytes(a,'UTF-8'))
-    print("Send: "+str(a))
+    print("[", datetime.datetime.now(), "] Send: "+str(a))
 
 def start():
     global status
@@ -84,7 +85,7 @@ def arduino_handler():
     global status
     while True:
         data = ser.readline().decode().strip()
-        # print("Receive: "+data)
+        # print("Received: "+data)
         match data[0]:
             # Sensor values update
             case "P":
@@ -121,7 +122,7 @@ def arduino_handler():
                         unit_flowrate.config(fg="black")
                         b_start["state"] = "normal"
             case _:
-                print("Receive: "+data)
+                print("[", datetime.datetime.now(), "] Receive: "+data)
 
 # Connect serial with Arduino
 ser = serial.Serial('COM6', 9600)

@@ -9,21 +9,19 @@
 #include <SoftwareI2C.h>
 #include "sensirion-lf.h"
 
-// Pinch
-#define PROPOR_PIN 1
+#define PROPOR_PIN 0
 #define PUMP_PIN 6
 // Gauge1 4,5 | Gauge2 2,3
 #define SOLPINCH_PIN 7
 #define PUMP_SOL_PIN 8
 #define P_VENT_PIN 9
 #define C_VENT_PIN 10
-const float pResTarget = 3000.0;
-const unsigned long cellLoadTimer = 2000;
-const float ventTarget = 1010.0;        // Stop venting 1s after reaching this value
-const unsigned long ventTimer = 5000;   // Or stop venting after this time
+const float pResTarget = 3100.0;
+const unsigned long cellLoadTimer = 3000;
+const float ventTarget = 950.0;        // Stop venting 1s after reaching this value [setting is as under 1000, I just nullified]
+const unsigned long ventTimer = 7000;   // Or stop venting after this time
 const unsigned long runningTimer = 20000;
 
-// System
 #define accumulatedMillis millis() - timerMillis
 #define GAUGE_ADDR 56 // 0x38
 #define OPEN HIGH
@@ -44,12 +42,11 @@ int mode;
 float target;
 unsigned char state;
 enum {Ready, Admin_C, Admin_P, Admin_A, Admin_A_1s, Admin_B, Admin_B_1s,
-    Pressurizing_vent, Pressurizing, CellLoading, Running_cellP, Running, Finish};
+    Pressurizing_vent, Pressurizing, CellLoading, Running_cellP, Running, Finish, Finish_1s};
 
 void setup() {
   Serial.begin(9600);
   state = Ready;
-  digitalWrite(LED_BUILTIN, OUTPUT);
   
   pinMode(PUMP_PIN, OUTPUT);
   pinMode(SOLPINCH_PIN, OUTPUT);
@@ -58,19 +55,20 @@ void setup() {
   pinMode(C_VENT_PIN, OUTPUT);
   pinMode(PROPOR_PIN, OUTPUT);
   analogWriteResolution(10);
-  // Gauge1
-  Wire.begin();
-  Wire.beginTransmission(GAUGE_ADDR);
-  Wire.endTransmission();
-  // Gauge2
-  softwarei2c.begin(2,3);
-  softwarei2c.beginTransmission(GAUGE_ADDR);
-  softwarei2c.endTransmission();
-  // Flow rate
-  SLF3X.init();
+  // // Gauge1
+  // Wire.begin();
+  // Wire.beginTransmission(GAUGE_ADDR);
+  // Wire.endTransmission();
+  // // Gauge2
+  // softwarei2c.begin(2,3);
+  // softwarei2c.beginTransmission(GAUGE_ADDR);
+  // softwarei2c.endTransmission();
+  // // Flow rate
+  // SLF3X.init();
 
   // Reset valves
   digitalWrite(PUMP_PIN, LOW);
+  digitalWrite(SOLPINCH_PIN, CLOSE);
   digitalWrite(PUMP_SOL_PIN, CLOSE);
   digitalWrite(P_VENT_PIN, CLOSE);
   digitalWrite(C_VENT_PIN, CLOSE);
@@ -96,7 +94,7 @@ void loop() {
                 break;
               case 'C':
                 // Cell Loading Pinch valve
-                digitalWrite(SOLPINCH_PIN, HIGH);
+                digitalWrite(SOLPINCH_PIN, OPEN);
                 timerMillis = millis();
                 state = Admin_C;
                 break;
@@ -109,6 +107,7 @@ void loop() {
               case 'A':
                 // Vent Pressure Reservoir
                 digitalWrite(P_VENT_PIN, OPEN);
+                digitalWrite(PUMP_SOL_PIN, OPEN);
                 timerMillis = millis();
                 state = Admin_A;
                 break;
@@ -150,6 +149,7 @@ void loop() {
     case Admin_A_1s:
       if (accumulatedMillis > 1) {
         digitalWrite(P_VENT_PIN, CLOSE);
+        digitalWrite(PUMP_SOL_PIN, CLOSE);
         state = Ready;
       }
     case Admin_B:
@@ -226,43 +226,48 @@ void loop() {
       }
       break;
     case Finish:
-      if (accumulatedMillis > ventTimer){
+      if (accumulatedMillis > ventTimer - 1.0 || resP < ventTarget){
+        timerMillis = millis();
+        state = Finish_1s;
+      }
+      break;
+    case Finish_1s:
+      if (accumulatedMillis > 1) {
         Serial.println("S0");
         // digitalWrite(P_VENT_PIN, CLOSE);
         // digitalWrite(C_VENT_PIN, CLOSE);
         state = Ready;
-        timerMillis = millis();
       }
       break;
   }
 
 
-  // Sensor values print
-  // Gauge1
-  Wire.requestFrom(GAUGE_ADDR, 2);
-  if (Wire.available() > 0){
-    raw_resP = Wire.read();
-    raw_resP = raw_resP << 8;
-    raw_resP |= Wire.read();
-    resP = 0.316456*raw_resP-1590.23;
-    Serial.println("P"+String(resP));
-  }  
+  // // Sensor values print
+  // // Gauge1
+  // Wire.requestFrom(GAUGE_ADDR, 2);
+  // if (Wire.available() > 0){
+  //   raw_resP = Wire.read();
+  //   raw_resP = raw_resP << 8;
+  //   raw_resP |= Wire.read();
+  //   resP = 0.316456*raw_resP-1590.23;
+  //   Serial.println("P"+String(resP));
+  // }  
 
-  // Gauge2
-  softwarei2c.requestFrom(GAUGE_ADDR, 2);
-  if (softwarei2c.available() > 0){
-    raw_cellP = softwarei2c.read();
-    raw_cellP = raw_cellP << 8;
-    raw_cellP |= softwarei2c.read();
-    cellP = 0.316456*raw_cellP-1590.23;
-    Serial.println("C"+String(cellP));
-  }
+  // // Gauge2
+  // softwarei2c.requestFrom(GAUGE_ADDR, 2);
+  // if (softwarei2c.available() > 0){
+  //   raw_cellP = softwarei2c.read();
+  //   raw_cellP = raw_cellP << 8;
+  //   raw_cellP |= softwarei2c.read();
+  //   cellP = 0.316456*raw_cellP-1590.23;
+  //   Serial.println("C"+String(cellP));
+  // }
 
-  // Flow rate
-  if (SLF3X.readSample() == 0) {
-    flowrate = SLF3X.getFlow();
-    Serial.println("F"+String(flowrate));
-  }
+  // // Flow rate
+  // if (SLF3X.readSample() == 0) {
+  //   flowrate = SLF3X.getFlow();
+  //   Serial.println("F"+String(flowrate));
+  // }
   
   Serial.println("V"+String(prop_target));
 

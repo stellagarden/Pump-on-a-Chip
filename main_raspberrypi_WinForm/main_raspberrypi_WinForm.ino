@@ -1,9 +1,17 @@
 // -----------------------------------------------------------
-// FileName     : main_raspberrypi_gagues_propValve_flow.ino
+// FileName     : main_raspberrypi_tkinter.ino
 // Author       : Hyemin Stella Lee
 // Created      : 06/15/2023
-// Description  : The whole system operating based on the protocol and manual mode
+// Description  : Control the whole system based with Python tkinter GUI
 // -----------------------------------------------------------
+
+// < NOTICE >
+// Due to bugs in PCB v01, following things are temporariliy different:
+//    - Gauges and flow rate sensor is disabled
+//    - Pin of proportional valve is 0, not 1
+// If you use normally operating PCB, please make following modification:
+//    - [Line:20] #define PROPOR_PIN 0 --> #define PROPOR_PIN 1
+//    - Uncomment lines 66-75, 253-278
 
 #include <Wire.h>
 #include <SoftwareI2C.h>
@@ -18,7 +26,7 @@
 #define C_VENT_PIN 10
 const float pResTarget = 3100.0;
 const unsigned long cellLoadTimer = 3000;
-const float ventTarget = 950.0;        // Stop venting 1s after reaching this value [setting is as under 1000, I just nullified]
+const float ventTarget = 1005.0;        // Stop venting 1s after reaching this value
 const unsigned long ventTimer = 7000;   // Or stop venting after this time
 const unsigned long runningTimer = 20000;
 

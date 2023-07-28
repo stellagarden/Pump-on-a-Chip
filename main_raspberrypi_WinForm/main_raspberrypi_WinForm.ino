@@ -1,34 +1,24 @@
 // -----------------------------------------------------------
-// FileName     : main_raspberrypi_tkinter.ino
+// FileName     : main_raspberrypi_WinForm.ino
 // Author       : Hyemin Stella Lee
-// Created      : 06/15/2023
-// Description  : Control the whole system based with Python tkinter GUI
+// Created      : 07/26/2023
+// Description  : Control the whole system with WinForm UI
 // -----------------------------------------------------------
-
-// < NOTICE >
-// Due to bugs in PCB v01, following things are temporariliy different:
-//    - Gauges and flow rate sensor is disabled
-//    - Pin of proportional valve is 0, not 1
-// If you use normally operating PCB, please make following modification:
-//    - [Line:20] #define PROPOR_PIN 0 --> #define PROPOR_PIN 1
-//    - Uncomment lines 66-75, 253-278
 
 #include <Wire.h>
 #include <SoftwareI2C.h>
 #include "sensirion-lf.h"
 
-#define PROPOR_PIN 0
+#define PROPOR_PIN 1
 #define PUMP_PIN 6
 // Gauge1 4,5 | Gauge2 2,3
 #define SOLPINCH_PIN 7
 #define PUMP_SOL_PIN 8
 #define P_VENT_PIN 9
 #define C_VENT_PIN 10
-const float pResTarget = 3100.0;
-const unsigned long cellLoadTimer = 3000;
-const float ventTarget = 1005.0;        // Stop venting 1s after reaching this value
-const unsigned long ventTimer = 7000;   // Or stop venting after this time
-const unsigned long runningTimer = 20000;
+const unsigned long cellLoadTimer = 10000;
+const unsigned long ventTimer = 7000;
+const unsigned long runningTimer = 15000;
 
 #define accumulatedMillis millis() - timerMillis
 #define GAUGE_ADDR 56 // 0x38
@@ -38,19 +28,23 @@ unsigned long timerMillis;
 
 SoftwareI2C softwarei2c;
 
+float pResTarget = 3100.0;
+float pCellTarget = 300.0;
 uint16_t raw_resP = 0;
-float resP = 0;
+float resP = 3110;
 uint16_t raw_cellP = 0;
-float cellP = 0;
-float atP = 1000;
+float cellP = 302;
+float atP = 1005;
 float flowrate = 0.0;
-float prop_target = 0.0;
+int prop_target = 0;
 int prop_int = 0;
-int mode;
-float target;
+int atP_measuring = 0;
 unsigned char state;
-enum {Ready, Admin_C, Admin_P, Admin_A, Admin_A_1s, Admin_B, Admin_B_1s,
-    Pressurizing_vent, Pressurizing, CellLoading, Running_cellP, Running, Finish, Finish_1s};
+enum {MeasurePat_vent, MeasurePat_vent_2s, Ready, Admin_C, Admin_P, Admin_A, Admin_A_2s, Admin_B, Admin_B_2s,
+    CellLoading, Pressurizing, Running, Finish, Finish_2s};
+int i = 2000;
+int j = 1000;
+int k = 0;
 
 void setup() {
   Serial.begin(9600);
@@ -91,14 +85,24 @@ void loop() {
       if (Serial.available() > 0){
             String data = Serial.readString();
             switch (data.charAt(0)){
+              case 'I':
+                // Initializing + remeasure P_at
+                atP_measuring = 1;
+                digitalWrite(PUMP_PIN, LOW);
+                digitalWrite(SOLPINCH_PIN, CLOSE);
+                digitalWrite(P_VENT_PIN, OPEN);
+                digitalWrite(PUMP_SOL_PIN, OPEN);
+                digitalWrite(C_VENT_PIN, OPEN);
+                analogWrite(PROPOR_PIN, 0);
+                timerMillis = millis();
+                state = MeasurePat_vent;
+                break;
               case 'S':
                 // Start button
-                mode = data.charAt(1)-'0';      // 0: pressure, 1: flowrate
-                target = data.substring(2).toFloat();
-                digitalWrite(P_VENT_PIN, OPEN);
-                digitalWrite(C_VENT_PIN, OPEN);
+                pCellTarget = data.substring(1).toFloat();
+                digitalWrite(SOLPINCH_PIN, OPEN);
                 timerMillis = millis();
-                state = Pressurizing_vent;
+                state = CellLoading;
                 break;
               case 'C':
                 // Cell Loading Pinch valve
@@ -108,6 +112,7 @@ void loop() {
                 break;
               case 'P':
                 // Pump
+                pResTarget = data.substring(1).toFloat();
                 digitalWrite(PUMP_PIN, HIGH);
                 digitalWrite(PUMP_SOL_PIN, OPEN);
                 state = Admin_P;
@@ -129,10 +134,33 @@ void loop() {
                 // Proportional Valve
                 prop_target = data.substring(1).toFloat();
                 prop_int = prop_target*1023/100;
-                Serial.println("*Set prop valve as "+String(prop_int));
                 analogWrite(PROPOR_PIN, prop_int);
+                Serial.println("V"+String(prop_target));
+                Serial.println("*Set prop valve as "+String(prop_int));
                 break;
+              case 'T':
+                // Update pResTarget
+                pResTarget = data.substring(1).toFloat();
+                break;
+              
             }
+      }
+      break;
+    case MeasurePat_vent:
+      if (accumulatedMillis > ventTimer - 2.0 || resP < atP) {
+        timerMillis = millis();
+        state = MeasurePat_vent_2s;
+      }
+      break;
+    case MeasurePat_vent_2s:
+      if (accumulatedMillis > 2) {
+        atP = cellP;
+        digitalWrite(P_VENT_PIN, CLOSE);
+        digitalWrite(PUMP_SOL_PIN, CLOSE);
+        digitalWrite(C_VENT_PIN, CLOSE);
+        Serial.println("R"+String(atP));
+        atP_measuring = 0;
+        state = Ready;
       }
       break;
     case Admin_C:
@@ -149,54 +177,44 @@ void loop() {
       }
       break;
     case Admin_A:
-      if (accumulatedMillis > ventTimer - 1.0 || resP < ventTarget) {
+      if (accumulatedMillis > ventTimer - 2.0 || resP < atP) {
         timerMillis = millis();
-        state = Admin_A_1s;
+        state = Admin_A_2s;
       }
       break;
-    case Admin_A_1s:
-      if (accumulatedMillis > 1) {
+    case Admin_A_2s:
+      if (accumulatedMillis > 2) {
         digitalWrite(P_VENT_PIN, CLOSE);
         digitalWrite(PUMP_SOL_PIN, CLOSE);
         state = Ready;
       }
     case Admin_B:
-      if (accumulatedMillis > ventTimer - 1.0 || cellP < ventTarget) {
+      if (accumulatedMillis > ventTimer - 2.0 || cellP < atP) {
         timerMillis = millis();
-        state = Admin_B_1s;
+        state = Admin_B_2s;
       }
       break;
-    case Admin_B_1s:
-      if (accumulatedMillis > 1) {
+    case Admin_B_2s:
+      if (accumulatedMillis > 2) {
         digitalWrite(C_VENT_PIN, CLOSE);
         state = Ready;
       }
       break;
-    case Pressurizing_vent:
-      if (accumulatedMillis > 1.0) {
-        digitalWrite(P_VENT_PIN, CLOSE);
-        digitalWrite(C_VENT_PIN, CLOSE);
-        atP = cellP;
-        Serial.println("*P_at: "+String(atP)+" mbar");
+    case CellLoading:
+      if (accumulatedMillis > cellLoadTimer){
+        Serial.println("S2");
+        digitalWrite(SOLPINCH_PIN, CLOSE);
         digitalWrite(PUMP_PIN, HIGH);
         digitalWrite(PUMP_SOL_PIN, OPEN);
         state = Pressurizing;
+        timerMillis = millis();
       }
       break;
     case Pressurizing:
       if (resP > pResTarget){
         digitalWrite(PUMP_PIN, LOW);
         digitalWrite(PUMP_SOL_PIN, CLOSE);
-        Serial.println("S2");
-        digitalWrite(SOLPINCH_PIN, OPEN);
-        state = CellLoading;
-        timerMillis = millis();
-      }
-      break;
-    case CellLoading:
-      if (accumulatedMillis > cellLoadTimer){
         Serial.println("S3");
-        digitalWrite(SOLPINCH_PIN, CLOSE);
         state = Running;
         timerMillis = millis();
       }
@@ -204,80 +222,97 @@ void loop() {
     case Running:
       if (accumulatedMillis > runningTimer){
         Serial.println("S4");
-        // digitalWrite(P_VENT_PIN, OPEN);
-        // digitalWrite(C_VENT_PIN, OPEN);
+        digitalWrite(P_VENT_PIN, OPEN);
+        digitalWrite(PUMP_SOL_PIN, OPEN);
+        digitalWrite(C_VENT_PIN, OPEN);
         state = Finish;
         timerMillis = millis();
       } else {
         int prop_int_nxt = 0;
-        if (mode == 0) {    // Pressure
-          // CALIBRATION NEEDED
-          if (cellP - atP < target - 200) {
-            prop_int_nxt = 590;
-          } else if (cellP - atP < target - 30) {
-            prop_int_nxt = 490;
-          } else {
-            prop_int_nxt = 0;
-          }
-          if (prop_int_nxt != prop_int){
-            analogWrite(PROPOR_PIN, prop_int_nxt);
-            Serial.println("*Set prop valve as "+String(prop_int_nxt));
-            prop_int = prop_int_nxt;
-          }
-          // ////////////////////////
+        // CALIBRATION NEEDED
+        if (cellP - atP < pCellTarget - 200) {
+          prop_int_nxt = 590;
+        } else if (cellP - atP < pCellTarget - 30) {
+          prop_int_nxt = 490;
+        } else {
+          prop_int_nxt = 0;
         }
-        // To-do: Make the target flow rate in the cell reservoir
-        else {
-          
+        if (prop_int_nxt != prop_int){
+          prop_int = prop_int_nxt;
+          prop_target = prop_int*100/1023;
+          analogWrite(PROPOR_PIN, prop_int);
+          Serial.println("V"+String(prop_target));
+          Serial.println("*Set prop valve as "+String(prop_int_nxt));
         }
-        // ///////////////////////////////////////////////////
       }
       break;
     case Finish:
-      if (accumulatedMillis > ventTimer - 1.0 || resP < ventTarget){
+      if (accumulatedMillis > ventTimer - 2.0 || resP < atP){
         timerMillis = millis();
-        state = Finish_1s;
+        state = Finish_2s;
       }
       break;
-    case Finish_1s:
-      if (accumulatedMillis > 1) {
+    case Finish_2s:
+      if (accumulatedMillis > 2) {
         Serial.println("S0");
-        // digitalWrite(P_VENT_PIN, CLOSE);
-        // digitalWrite(C_VENT_PIN, CLOSE);
+        digitalWrite(P_VENT_PIN, CLOSE);
+        digitalWrite(PUMP_SOL_PIN, CLOSE);
+        digitalWrite(C_VENT_PIN, CLOSE);
         state = Ready;
       }
       break;
   }
 
+  if (!atP_measuring){
+    // // Sensor values print
+    // // Gauge1
+    // Wire.requestFrom(GAUGE_ADDR, 2);
+    // if (Wire.available() > 0){
+    //   raw_resP = Wire.read();
+    //   raw_resP = raw_resP << 8;
+    //   raw_resP |= Wire.read();
+    //   resP = 0.316456*raw_resP-1590.23;
+    //   Serial.println("P"+String(resP));
+    // }  
+    if (i > 4000){
+      i = 2000;
+    } else {
+      i = i+1;
+    }
+    resP = i - atP;
+    Serial.println("P"+String(resP));
 
-  // // Sensor values print
-  // // Gauge1
-  // Wire.requestFrom(GAUGE_ADDR, 2);
-  // if (Wire.available() > 0){
-  //   raw_resP = Wire.read();
-  //   raw_resP = raw_resP << 8;
-  //   raw_resP |= Wire.read();
-  //   resP = 0.316456*raw_resP-1590.23;
-  //   Serial.println("P"+String(resP));
-  // }  
+    // // Gauge2
+    // softwarei2c.requestFrom(GAUGE_ADDR, 2);
+    // if (softwarei2c.available() > 0){
+    //   raw_cellP = softwarei2c.read();
+    //   raw_cellP = raw_cellP << 8;
+    //   raw_cellP |= softwarei2c.read();
+    //   cellP = 0.316456*raw_cellP-1590.23;
+    //   Serial.println("C"+String(cellP));
+    // }
+    if (j > 2000){
+      j = 1000;
+    } else {
+      j = j+1;
+    }
+    cellP = j - atP;
+    Serial.println("C"+String(cellP));
+  } else {
 
-  // // Gauge2
-  // softwarei2c.requestFrom(GAUGE_ADDR, 2);
-  // if (softwarei2c.available() > 0){
-  //   raw_cellP = softwarei2c.read();
-  //   raw_cellP = raw_cellP << 8;
-  //   raw_cellP |= softwarei2c.read();
-  //   cellP = 0.316456*raw_cellP-1590.23;
-  //   Serial.println("C"+String(cellP));
-  // }
+  }
 
   // // Flow rate
   // if (SLF3X.readSample() == 0) {
   //   flowrate = SLF3X.getFlow();
   //   Serial.println("F"+String(flowrate));
-  // }
-  
-  Serial.println("V"+String(prop_target));
+  // }  
+  if (k > 10){
+    k = 0;
+  } else {
+    k = k+1;
+  }
+  Serial.println("F"+String(k));
 
   delay(100);
   

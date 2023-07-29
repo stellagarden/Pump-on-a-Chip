@@ -8,7 +8,16 @@
 
 #include <Wire.h>
 
+#define PROPOR_PIN 1
+#define PUMP_PIN 6
+// Gauge1 4,5 | Gauge2 2,3
+#define PUMP_SOL_PIN 8
+#define P_VENT_PIN 9
+#define C_VENT_PIN 10
+
 #define GAUGE_ADDR 56 // 0x38
+#define OPEN HIGH
+#define CLOSE LOW
 uint16_t rawdata = 0;
 float pressure = 0;
 
@@ -17,6 +26,20 @@ void setup(){
   Wire.begin();
   Wire.beginTransmission(GAUGE_ADDR); //Send a request to begin communication with the device at the specified address
   Wire.endTransmission();
+  
+  pinMode(PUMP_PIN, OUTPUT);
+  pinMode(PUMP_SOL_PIN, OUTPUT);
+  pinMode(P_VENT_PIN, OUTPUT);
+  pinMode(C_VENT_PIN, OUTPUT);
+  pinMode(PROPOR_PIN, OUTPUT);
+  analogWriteResolution(10);
+  
+  // Reset valves
+  digitalWrite(PUMP_PIN, LOW);
+  digitalWrite(PUMP_SOL_PIN, CLOSE);
+  digitalWrite(P_VENT_PIN, CLOSE);
+  digitalWrite(C_VENT_PIN, CLOSE);
+  analogWrite(PROPOR_PIN, 0);
 }
 
 void loop(){

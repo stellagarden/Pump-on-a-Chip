@@ -5,13 +5,6 @@
 // Description  : Control the cell sampling system
 // -----------------------------------------------------------
 
-// Serial communication
-// If receive:
-// 0 - run pump
-// 1 - open pinch valve 1
-// 2 - open pinch valve 2
-// 3 - open pinch valve 3
-
 #define PUMP2_PIN 0
 #define PINCH1_PIN 1
 #define PINCH2_PIN 2

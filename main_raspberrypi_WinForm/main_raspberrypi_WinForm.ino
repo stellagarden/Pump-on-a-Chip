@@ -12,11 +12,9 @@
 #define PROPOR_PIN 1
 #define PUMP_PIN 6
 // Gauge1 4,5 | Gauge2 2,3
-#define SOLPINCH_PIN 7
 #define PUMP_SOL_PIN 8
 #define P_VENT_PIN 9
 #define C_VENT_PIN 10
-const unsigned long cellLoadTimer = 10000;
 const unsigned long ventTimer = 7000;
 const unsigned long runningTimer = 15000;
 
@@ -41,7 +39,7 @@ int prop_int = 0;
 int atP_measuring = 0;
 unsigned char state;
 enum {MeasurePat_vent, MeasurePat_vent_2s, Ready, Admin_C, Admin_P, Admin_A, Admin_A_2s, Admin_B, Admin_B_2s,
-    CellLoading, Pressurizing, Running, Finish, Finish_2s};
+    Pressurizing, Running, Finish, Finish_2s};
 int i = 2000;
 int j = 1000;
 int k = 0;
@@ -51,7 +49,6 @@ void setup() {
   state = Ready;
   
   pinMode(PUMP_PIN, OUTPUT);
-  pinMode(SOLPINCH_PIN, OUTPUT);
   pinMode(PUMP_SOL_PIN, OUTPUT);
   pinMode(P_VENT_PIN, OUTPUT);
   pinMode(C_VENT_PIN, OUTPUT);
@@ -70,7 +67,6 @@ void setup() {
 
   // Reset valves
   digitalWrite(PUMP_PIN, LOW);
-  digitalWrite(SOLPINCH_PIN, CLOSE);
   digitalWrite(PUMP_SOL_PIN, CLOSE);
   digitalWrite(P_VENT_PIN, CLOSE);
   digitalWrite(C_VENT_PIN, CLOSE);
@@ -78,72 +74,63 @@ void setup() {
 }
 
 void loop() {
-  // Status control
   switch (state) {
     case Ready:
-      // Administrator Mode
       if (Serial.available() > 0){
-            String data = Serial.readString();
-            switch (data.charAt(0)){
-              case 'I':
-                // Initializing + remeasure P_at
-                atP_measuring = 1;
-                digitalWrite(PUMP_PIN, LOW);
-                digitalWrite(SOLPINCH_PIN, CLOSE);
-                digitalWrite(P_VENT_PIN, OPEN);
-                digitalWrite(PUMP_SOL_PIN, OPEN);
-                digitalWrite(C_VENT_PIN, OPEN);
-                analogWrite(PROPOR_PIN, 0);
-                timerMillis = millis();
-                state = MeasurePat_vent;
-                break;
-              case 'S':
-                // Start button
-                pCellTarget = data.substring(1).toFloat();
-                digitalWrite(SOLPINCH_PIN, OPEN);
-                timerMillis = millis();
-                state = CellLoading;
-                break;
-              case 'C':
-                // Cell Loading Pinch valve
-                digitalWrite(SOLPINCH_PIN, OPEN);
-                timerMillis = millis();
-                state = Admin_C;
-                break;
-              case 'P':
-                // Pump
-                pResTarget = data.substring(1).toFloat();
-                digitalWrite(PUMP_PIN, HIGH);
-                digitalWrite(PUMP_SOL_PIN, OPEN);
-                state = Admin_P;
-                break;
-              case 'A':
-                // Vent Pressure Reservoir
-                digitalWrite(P_VENT_PIN, OPEN);
-                digitalWrite(PUMP_SOL_PIN, OPEN);
-                timerMillis = millis();
-                state = Admin_A;
-                break;
-              case 'B':
-                // Vent Cell Reservoir
-                digitalWrite(C_VENT_PIN, OPEN);
-                timerMillis = millis();
-                state = Admin_B;
-                break;
-              case 'V':
-                // Proportional Valve
-                prop_target = data.substring(1).toFloat();
-                prop_int = prop_target*1023/100;
-                analogWrite(PROPOR_PIN, prop_int);
-                Serial.println("V"+String(prop_target));
-                Serial.println("*Set prop valve as "+String(prop_int));
-                break;
-              case 'T':
-                // Update pResTarget
-                pResTarget = data.substring(1).toFloat();
-                break;
-              
-            }
+        String data = Serial.readString();
+        switch (data.charAt(0)){
+          case 'I':
+            // Initializing + remeasure P_at
+            atP_measuring = 1;
+            digitalWrite(PUMP_PIN, LOW);
+            digitalWrite(P_VENT_PIN, OPEN);
+            digitalWrite(PUMP_SOL_PIN, OPEN);
+            digitalWrite(C_VENT_PIN, OPEN);
+            analogWrite(PROPOR_PIN, 0);
+            Serial.println("V"+String(prop_target));
+            timerMillis = millis();
+            state = MeasurePat_vent;
+            break;
+          case 'S':
+            // Start button
+            pCellTarget = data.substring(1).toFloat();
+            digitalWrite(PUMP_PIN, HIGH);
+            digitalWrite(PUMP_SOL_PIN, OPEN);
+            state = Pressurizing;
+            break;
+          case 'P':
+            // Pump
+            pResTarget = data.substring(1).toFloat();
+            digitalWrite(PUMP_PIN, HIGH);
+            digitalWrite(PUMP_SOL_PIN, OPEN);
+            state = Admin_P;
+            break;
+          case 'A':
+            // Vent Pressure Reservoir
+            digitalWrite(P_VENT_PIN, OPEN);
+            digitalWrite(PUMP_SOL_PIN, OPEN);
+            timerMillis = millis();
+            state = Admin_A;
+            break;
+          case 'B':
+            // Vent Cell Reservoir
+            digitalWrite(C_VENT_PIN, OPEN);
+            timerMillis = millis();
+            state = Admin_B;
+            break;
+          case 'V':
+            // Proportional Valve
+            prop_target = data.substring(1).toFloat();
+            prop_int = prop_target*1023/100;
+            analogWrite(PROPOR_PIN, prop_int);
+            Serial.println("V"+String(prop_target));
+            Serial.println("*Set prop valve as "+String(prop_int));
+            break;
+          case 'T':
+            // Update pResTarget
+            pResTarget = data.substring(1).toFloat();
+            break;
+        }
       }
       break;
     case MeasurePat_vent:
@@ -160,12 +147,6 @@ void loop() {
         digitalWrite(C_VENT_PIN, CLOSE);
         Serial.println("R"+String(atP));
         atP_measuring = 0;
-        state = Ready;
-      }
-      break;
-    case Admin_C:
-      if (accumulatedMillis > cellLoadTimer) {
-        digitalWrite(SOLPINCH_PIN, CLOSE);
         state = Ready;
       }
       break;
@@ -198,16 +179,6 @@ void loop() {
       if (accumulatedMillis > 2) {
         digitalWrite(C_VENT_PIN, CLOSE);
         state = Ready;
-      }
-      break;
-    case CellLoading:
-      if (accumulatedMillis > cellLoadTimer){
-        Serial.println("S2");
-        digitalWrite(SOLPINCH_PIN, CLOSE);
-        digitalWrite(PUMP_PIN, HIGH);
-        digitalWrite(PUMP_SOL_PIN, OPEN);
-        state = Pressurizing;
-        timerMillis = millis();
       }
       break;
     case Pressurizing:

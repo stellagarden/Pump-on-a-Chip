@@ -18,7 +18,7 @@ const unsigned long discardTimer = 5000;
 unsigned long timerMillis;
 
 unsigned char state;
-enum {Ready, Draw, Discard};
+enum {Ready, Draw, Discard_cellwaste, Discard_cell};
 
 void setup() {
   Serial.begin(9600);
@@ -50,6 +50,12 @@ void loop() {
             timerMillis = millis();
             state = Draw;
             break;
+          case 'U':
+            // Change to user mode = Initialize all the pump and valves
+            digitalWrite(PUMP2_PIN, LOW);
+            digitalWrite(PINCH1_PIN, CLOSE);
+            digitalWrite(PINCH2_PIN, CLOSE);
+            digitalWrite(PINCH3_PIN, CLOSE);
           case 'P':
             if (data.charAt(1) == 'O'){
               digitalWrite(PUMP2_PIN, HIGH);
@@ -91,12 +97,20 @@ void loop() {
         digitalWrite(PINCH3_PIN, CLOSE);
         digitalWrite(PINCH2_PIN, OPEN);
         timerMillis = millis();
-        state = Discard;
+        state = Discard_cellwaste;
       }
       break;
-    case Discard:
+    case Discard_cellwaste:
+      if (accumulatedMillis > discardTimer) {
+        digitalWrite(PINCH3_PIN, OPEN);
+        timerMillis = millis();
+        state = Discard_cell;
+      }
+      break;
+    case Discard_cell:
       if (accumulatedMillis > discardTimer) {
         digitalWrite(PINCH2_PIN, CLOSE);
+        digitalWrite(PINCH3_PIN, CLOSE);
         digitalWrite(PUMP2_PIN, LOW);
         Serial.println("D");
         state = Ready;

@@ -9,7 +9,7 @@
 #define PINCH1_PIN 1
 #define PINCH2_PIN 2
 #define PINCH3_PIN 3
-const unsigned long cellLoadTimer = 10000;
+const unsigned long cellLoadTimer = 15000;
 const unsigned long discardTimer = 5000;
 
 #define accumulatedMillis millis() - timerMillis

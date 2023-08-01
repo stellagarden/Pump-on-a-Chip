@@ -17,7 +17,7 @@
 #define P_VENT_PIN 9
 #define C_VENT_PIN 10
 const unsigned long ventTimer = 5000;
-const unsigned long runningTimer = 100000;
+const unsigned long runningTimer = 60000;
 const unsigned long pumpMaxTimer = 15000;
 
 #define accumulatedMillis millis() - timerMillis
